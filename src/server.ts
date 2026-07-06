@@ -1,8 +1,9 @@
 import express, { type Express, type Request, type Response } from "express";
 import app from "./app";
 import { prisma } from "./lib/prisma";
+import config from "./config";
 
-const port = 5000;
+const port = config.port;
 
 async function main() {
   try {
