@@ -10,11 +10,9 @@ model Service {
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
-  // Relations
   bookings Booking[]
 
   @@index([categoryId])
   @@index([technicianId])
-  @@index([price])
   @@map("services")
 }
