@@ -33,7 +33,7 @@ const login = catchAsync(
       httpOnly: true,
       secure: false,
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24 * 7, 
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
     sendResponse(res, {
@@ -45,7 +45,43 @@ const login = catchAsync(
   },
 );
 
+const refreshToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { refreshToken } = req.cookies;
+
+    const result = await AuthService.rotateSessionToken(refreshToken);
+
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24,
+    });
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Access token renewed successfully",
+      data: result,
+    });
+  },
+);
+
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  const { id, role } = req.user!;
+  const result = await AuthService.getMe(id, role);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User profile context retrieved successfully",
+    data: result,
+  });
+});
+
 export const AuthController = {
   register,
   login,
+  refreshToken,
+  getMe
 };

@@ -4,7 +4,11 @@ import httpStatus from "http-status";
 import bcrypt from "bcryptjs";
 import config from "../../config";
 import { User } from "../../../generated/prisma/browser";
-import { TLoginResponse } from "./auth.interface";
+import {
+  TLoginResponse,
+  TRefreshTokenResponse,
+  TUserResponse,
+} from "./auth.interface";
 import { jwtHelpers } from "../../utils/jwtHelpers";
 
 const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
@@ -103,7 +107,68 @@ const loginUser = async (
   };
 };
 
+const rotateSessionToken = async (
+  token: string,
+): Promise<TRefreshTokenResponse> => {
+  let decodedPayload;
+  try {
+    decodedPayload = jwtHelpers.verifyToken(token, config.jwt_refresh_secret);
+  } catch (error) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      "Session expired: Refresh token validation failure",
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: decodedPayload.id, isDeleted: false },
+  });
+
+  if (!user || user.status === "BANNED") {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "Invalid security context for session rotation",
+    );
+  }
+
+  const newAccessToken = jwtHelpers.generateToken(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    config.jwt_access_secret,
+    config.jwt_access_expires_in,
+  );
+
+  return { accessToken: newAccessToken };
+};
+
+const getMe = async (id: string, role: string): Promise<TUserResponse> => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: {
+      technicianProfile: role === "TECHNICIAN",
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Profile extraction error: User account tracking mismatch",
+    );
+  }
+
+  const { password: _, ...cleanProfile } = user;
+  return cleanProfile;
+};
+
 export const AuthService = {
   registerUser,
   loginUser,
+  rotateSessionToken,
+  getMe,
 };

@@ -7,7 +7,7 @@ import { jwtHelpers } from "../utils/jwtHelpers";
 import config from "../config";
 import { prisma } from "../lib/prisma";
 
-export const authGuard = (...requiredRole: UserRole[]) => {
+export const authGuard = (...requiredRoles: UserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.accessToken
       ? req.cookies.accessToken
@@ -41,8 +41,33 @@ export const authGuard = (...requiredRole: UserRole[]) => {
       },
     });
 
+    if (!user) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "User not found or has been deleted",
+      );
+    }
 
+    if (user.status === "BANNED") {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Your account has been deactivated",
+      );
+    }
 
-    
+    if (requiredRoles.length && !requiredRoles.includes(user.role)) {
+      throw new ApiError(
+        403,
+        "Forbidden: You do not have permission to perform this action",
+      );
+    }
+
+    req.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    next();
   });
 };
