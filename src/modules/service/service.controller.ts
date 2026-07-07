@@ -30,6 +30,7 @@ const getAllServices = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Services Fetch Successfully",
+    data: result,
   });
 });
 

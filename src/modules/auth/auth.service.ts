@@ -3,13 +3,13 @@ import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 import bcrypt from "bcryptjs";
 import config from "../../config";
-import { User } from "../../../generated/prisma/browser";
 import {
   TLoginResponse,
   TRefreshTokenResponse,
   TUserResponse,
 } from "./auth.interface";
 import { jwtHelpers } from "../../utils/jwtHelpers";
+import { User } from "../../../generated/prisma/client";
 
 const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
   const isUserExist = await prisma.user.findUnique({

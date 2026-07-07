@@ -1,6 +1,8 @@
 import { ErrorRequestHandler } from "express";
 import { TErrorSources } from "../interfaces/error.interface.js";
-import { ApiError } from "./ApiError.js";
+import { ApiError } from "./ApiError";
+
+
 
 export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   let statusCode = 500;
@@ -33,6 +35,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
 
   res.status(statusCode).json({
     success: false,
+    statusCode,
     message,
     errorSources,
   });

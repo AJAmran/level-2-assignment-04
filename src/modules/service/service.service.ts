@@ -6,13 +6,10 @@ import { TServiceFilterableFields } from "./service.interface";
 
 const createService = async (
   technicanId: string,
-  payload: Omit<
-    Service,
-    "id" | "technicianId" | "isDeleted" | "isDeleted" | "updatedAt"
-  >,
+  payload: Omit<Service, "id" | "technicianId" | "isDeleted" | "updatedAt" | "createdAt">,
 ): Promise<Service> => {
   //verify target Category existence
-  const categoryExists = await prisma.service.findUnique({
+  const categoryExists = await prisma.category.findUnique({
     where: { id: payload.categoryId },
   });
 

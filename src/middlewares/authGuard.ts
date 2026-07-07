@@ -16,12 +16,10 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
         : req.headers.authorization;
 
     if (!token) {
-      if (!token) {
-        throw new ApiError(
-          httpStatus.UNAUTHORIZED,
-          "You are not authorized to access this resource",
-        );
-      }
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "You are not authorized to access this resource",
+      );
     }
 
     let decodedUser;
