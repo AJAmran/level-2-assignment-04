@@ -28,14 +28,41 @@ const sslWebhook = catchAsync(async (req: Request, res: Response) => {
     req.body,
   );
 
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
   if (status === "success") {
-    res.redirect(`http://localhost:3000/dashboard/bookings?payment=success`);
+    res.redirect(`${frontendUrl}/dashboard/bookings?payment=success`);
   } else {
-    res.redirect(`http://localhost:3000/dashboard/bookings?payment=failed`);
+    res.redirect(`${frontendUrl}/dashboard/bookings?payment=failed`);
   }
+});
+
+const getUserPayments = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const result = await PaymentService.getUserPayments(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Payments retrieved successfully",
+    data: result,
+  });
+});
+
+const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const paymentId = req.params.id as string;
+  const result = await PaymentService.getPaymentDetails(userId, paymentId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Payment details retrieved successfully",
+    data: result,
+  });
 });
 
 export const paymentController = {
   checkout,
   sslWebhook,
+  getUserPayments,
+  getPaymentDetails,
 };

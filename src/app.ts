@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 //Primary Central Route
-app.use("/api/v1", globalRouter);
+app.use("/api", globalRouter);
 
 app.use(notFoundHandler);
 

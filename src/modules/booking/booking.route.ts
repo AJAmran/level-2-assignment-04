@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authGuard } from "../../middlewares/authGuard";
 import { UserRole } from "../../../generated/prisma/enums";
 import { bookingController } from "./booking.controller";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { GlobalValidations } from "../../utils/validations";
 
 const router = Router();
 
@@ -18,6 +20,7 @@ router.get(
 router.patch(
   "/:id/status",
   authGuard(UserRole.TECHNICIAN, UserRole.ADMIN),
+  validateRequest(GlobalValidations.updateBookingStatusSchema),
   bookingController.updateBookingStateByTechnician,
 );
 router.patch(
@@ -25,6 +28,6 @@ router.patch(
   authGuard(UserRole.CUSTOMER),
   bookingController.cancelBooking,
 );
-router.post("/", authGuard(UserRole.CUSTOMER), bookingController.createBooking);
+router.post("/", authGuard(UserRole.CUSTOMER), validateRequest(GlobalValidations.createBookingSchema), bookingController.createBooking);
 
 export const BookingRoutes = router;

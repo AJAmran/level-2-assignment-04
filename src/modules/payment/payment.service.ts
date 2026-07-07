@@ -29,9 +29,9 @@ const initiatePayment = async (
     total_amount: booking.service.price.toString(),
     currency: "BDT",
     tran_id: transactionId,
-    success_url: `${config.app_url}/api/v1/payments/webhook?bookingId=${booking.id}&tranId=${transactionId}&status=success`,
-    fail_url: `${config.app_url}/api/v1/payments/webhook?bookingId=${booking.id}&tranId=${transactionId}&status=fail`,
-    cancel_url: `${config.app_url}/api/v1/payments/webhook?bookingId=${booking.id}&tranId=${transactionId}&status=cancel`,
+    success_url: `${config.app_url}/api/payments/confirm?bookingId=${booking.id}&tranId=${transactionId}&status=success`,
+    fail_url: `${config.app_url}/api/payments/confirm?bookingId=${booking.id}&tranId=${transactionId}&status=fail`,
+    cancel_url: `${config.app_url}/api/payments/confirm?bookingId=${booking.id}&tranId=${transactionId}&status=cancel`,
     cus_name: booking.customer.email.split("@")[0] || "Customer",
     cus_email: booking.customer.email,
     cus_add1: "Dhaka",
@@ -93,4 +93,23 @@ const handleWebhookNotification = async (bookingId: string, tranId: string, stat
   });
 };
 
-export const PaymentService = { initiatePayment, handleWebhookNotification };
+const getUserPayments = async (userId: string) => {
+  return await prisma.payment.findMany({
+    where: { booking: { customerId: userId } },
+    include: { booking: true }
+  });
+};
+
+const getPaymentDetails = async (userId: string, paymentId: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    include: { booking: true }
+  });
+
+  if (!payment || payment.booking.customerId !== userId) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+  return payment;
+};
+
+export const PaymentService = { initiatePayment, handleWebhookNotification, getUserPayments, getPaymentDetails };
