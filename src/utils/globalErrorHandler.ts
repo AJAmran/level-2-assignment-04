@@ -7,7 +7,7 @@ import { ApiError } from "./ApiError";
 export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   let statusCode = 500;
   let message = "Something went wrong!";
-  let errorSources: TErrorSources = [
+  let errorDetails: TErrorSources = [
     {
       path: "",
       message: "Internal Server Error",
@@ -17,7 +17,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
   if (err instanceof ApiError) {
     statusCode = err.statusCode;
     message = err.message;
-    errorSources = [
+    errorDetails = [
       {
         path: "",
         message: err.message,
@@ -25,7 +25,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
     ];
   } else if (err instanceof Error) {
     message = err.message;
-    errorSources = [
+    errorDetails = [
       {
         path: "",
         message: err.message,
@@ -37,6 +37,6 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
     success: false,
     statusCode,
     message,
-    errorSources,
+    errorDetails,
   });
 };
