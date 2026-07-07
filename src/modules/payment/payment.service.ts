@@ -4,14 +4,21 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 
-const initiatePayment = async (bookingId: string, userId: string): Promise<string> => {
+const initiatePayment = async (
+  bookingId: string,
+  userId: string,
+): Promise<string> => {
   // 1. Fetch matching Booking with attached Service details
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId, customerId: userId },
     include: { service: true, customer: true },
   });
 
-  if (!booking) throw new ApiError(httpStatus.NOT_FOUND, "Target booking context data missing.");
+  if (!booking)
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Target booking context data missing.",
+    );
 
   const transactionId = `TXN_${Date.now()}`;
 
@@ -36,7 +43,7 @@ const initiatePayment = async (bookingId: string, userId: string): Promise<strin
   const response = await axios.post(
     "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
     paymentData.toString(),
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
   );
 
   console.log(response.data);
@@ -54,9 +61,36 @@ const initiatePayment = async (bookingId: string, userId: string): Promise<strin
     return response.data.GatewayPageURL;
   }
 
-  throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "SSLCommerz generation tracking handshake dropped.");
+  throw new ApiError(
+    httpStatus.INTERNAL_SERVER_ERROR,
+    "SSLCommerz generation tracking handshake dropped.",
+  );
 };
 
+const handleWebhookNotification = async (bookingId: string, tranId: string, status: string, payload: any) => {
+  // 1. Execute transactional mutations to lock parameters seamlessly 
+  return await prisma.$transaction(async (tx) => {
+    if (status === "success") {
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: { status: "PAID" }, // Shift state machine forward
+      });
+      await tx.payment.update({
+        where: { transactionId: tranId },
+        data: { status: "COMPLETED", paidAt: new Date() },
+      });
+    } else {
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: { status: "CANCELLED" },
+      });
+      await tx.payment.update({
+        where: { transactionId: tranId },
+        data: { status: "FAILED" },
+      });
+    }
+    return status;
+  });
+};
 
-
-export const PaymentService = { initiatePayment };
+export const PaymentService = { initiatePayment, handleWebhookNotification };

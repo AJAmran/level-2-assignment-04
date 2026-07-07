@@ -10,5 +10,6 @@ router.post(
   authGuard(UserRole.CUSTOMER),
   paymentController.checkout,
 );
+router.post("/webhook", paymentController.sslWebhook);
 
 export const PaymentRoutes = router;
