@@ -74,6 +74,21 @@ const createReview = async (
   });
 };
 
+const getTehnicianReviews = async (
+  technicianProfileId: string,
+): Promise<Review[]> => {
+  return await prisma.review.findMany({
+    where: { technicianId: technicianProfileId },
+    include: {
+      customer: {
+        select: { id: true, email: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};
+
 export const ReviewService = {
   createReview,
+  getTehnicianReviews,
 };
