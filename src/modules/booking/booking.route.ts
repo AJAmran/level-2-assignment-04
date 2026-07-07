@@ -5,10 +5,26 @@ import { bookingController } from "./booking.controller";
 
 const router = Router();
 
-router.post(
+router.get(
   "/",
-  authGuard(UserRole.CUSTOMER, UserRole.TECHNICIAN, UserRole.ADMIN),
-  bookingController.createBooking,
+  authGuard(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.TECHNICIAN),
+  bookingController.getUserBookings,
 );
+router.get(
+  "/:id",
+  authGuard(UserRole.ADMIN, UserRole.CUSTOMER, UserRole.TECHNICIAN),
+  bookingController.getBookingDetails,
+);
+router.patch(
+  "/:id/status",
+  authGuard(UserRole.TECHNICIAN, UserRole.ADMIN),
+  bookingController.updateBookingStateByTechnician,
+);
+router.patch(
+  "/:id/cancel",
+  authGuard(UserRole.CUSTOMER),
+  bookingController.cancelBooking,
+);
+router.post("/", authGuard(UserRole.CUSTOMER), bookingController.createBooking);
 
 export const BookingRoutes = router;

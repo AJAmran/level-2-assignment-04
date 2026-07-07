@@ -11,5 +11,7 @@ export default {
     jwt_refresh_secret: process.env.JWT_REFRESH_SECRET!,
     jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN!,
     jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN!,
-    salt_rounds: process.env.SALT_ROUNDS
+    salt_rounds: process.env.SALT_ROUNDS,
+    storeId: process.env.STORE_ID!,
+    storePasswd: process.env.STORE_PASSWD!,
 }
