@@ -1,7 +1,3 @@
-/**
- * Admin module business logic.
- * Handles user management, platform-wide booking queries, and category CRUD.
- */
 import { prisma } from "../../lib/prisma";
 
 type CategoryCreatePayload = {

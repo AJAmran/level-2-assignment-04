@@ -1,7 +1,3 @@
-/**
- * Admin module controllers.
- * Handles HTTP request/response for admin dashboard operations.
- */
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AdminService } from "./admin.service";

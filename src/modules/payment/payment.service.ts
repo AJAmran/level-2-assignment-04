@@ -1,7 +1,3 @@
-/**
- * Payment module business logic.
- * Handles SSLCommerz payment initiation, server-side verification, and history retrieval.
- */
 import axios from "axios";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";

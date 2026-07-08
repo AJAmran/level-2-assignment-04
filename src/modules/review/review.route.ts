@@ -1,8 +1,3 @@
-/**
- * Review module routes.
- * - GET  /technician/:technicianId – Fetch public reviews for a technician
- * - POST /                         – Submit a review for a completed booking (customer-only)
- */
 import { Router } from "express";
 import { authGuard } from "../../middlewares/authGuard";
 import { UserRole } from "../../../generated/prisma/enums";

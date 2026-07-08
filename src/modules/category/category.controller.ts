@@ -1,14 +1,11 @@
-/**
- * Category module controllers.
- * Handles HTTP request/response for category operations.
- */
+
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { categoryService } from "./category.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
-/** Create a new category. */
+
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await categoryService.createCategory(req.body);
   sendResponse(res, {
@@ -19,7 +16,7 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Retrieve all categories ordered alphabetically. */
+
 const getAllCategories = catchAsync(async (req: Request, res: Response) => {
   const result = await categoryService.getAllCategories();
 

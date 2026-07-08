@@ -1,9 +1,3 @@
-/**
- * Authentication & Authorization Guard Middleware
- * Protects routes by verifying JWT access tokens from cookies or Authorization header.
- * Optionally enforces role-based access control for specified roles.
- * Attaches the authenticated user context (id, email, role) to req.user on success.
- */
 import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../../generated/prisma/enums";

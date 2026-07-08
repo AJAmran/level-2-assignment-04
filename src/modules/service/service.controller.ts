@@ -4,7 +4,7 @@ import { ServiceService } from "./service.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
-/** Create a new service offering for the authenticated technician. */
+
 const createService = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const result = await ServiceService.createService(userId, req.body);
@@ -17,7 +17,6 @@ const createService = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Retrieve all non-deleted services with optional search/category/price filters. */
 const getAllServices = catchAsync(async (req: Request, res: Response) => {
   const filters = {
     search: req.query.search as string,
@@ -36,7 +35,6 @@ const getAllServices = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Update a service offering owned by the authenticated technician. */
 const updateService = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const serviceId = req.params.id as string;
@@ -50,7 +48,6 @@ const updateService = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Soft-delete a service offering owned by the authenticated technician. */
 const deleteService = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const serviceId = req.params.id as string;

@@ -1,12 +1,3 @@
-/**
- * Auth Service
- *
- * Contains all business logic for authentication operations:
- * registration, login, token rotation, and profile retrieval.
- * Interacts with Prisma for data persistence and jwtHelpers for token management.
- *
- * @module AuthService
- */
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";

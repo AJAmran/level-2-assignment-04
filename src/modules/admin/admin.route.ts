@@ -1,12 +1,3 @@
-/**
- * Admin module routes.
- * All routes are guarded by ADMIN role.
- * - GET    /users         – List all users (paginated)
- * - PATCH  /users/:id     – Activate or ban a user
- * - GET    /bookings      – List all bookings (paginated)
- * - GET    /categories    – List all categories
- * - POST   /categories    – Create a new category
- */
 import { Router } from "express";
 import { AdminController } from "./admin.controller";
 import { authGuard } from "../../middlewares/authGuard";
