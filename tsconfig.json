@@ -1,19 +1,20 @@
 {
-  "compilerOptions": {
-    "outDir": "./dist",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "esnext",
-    "types": ["node"],
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noUncheckedIndexedAccess": true,
-    "strict": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true
-  },
-  "exclude": ["node_modules", "dist"]
+"compilerOptions": {
+"outDir": "./dist",
+"module": "CommonJS",
+"target": "ES2023",
+"types": ["node"],
+"sourceMap": true,
+"declaration": true,
+"declarationMap": true,
+"noUncheckedIndexedAccess": true,
+"strict": true,
+"isolatedModules": true,
+"noUncheckedSideEffectImports": true,
+"moduleDetection": "force",
+"skipLibCheck": true,
+"esModuleInterop": true
+},
+// "include": ["src/**/"],
+"exclude": ["node_modules", "dist"]
 }

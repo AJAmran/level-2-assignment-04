@@ -5,9 +5,9 @@
   "main": "server.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsup src/server.ts --format esm",
-    "postinstall": "prisma generate",
     "start": "node dist/server.js",
+    "build": "tsup src/server.ts --format esm --clean",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
