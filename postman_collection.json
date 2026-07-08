@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "FixItNow API",
-    "description": "API collection for FixItNow Backend Services.",
+    "description": "Complete API collection for FixItNow Backend — Home Services Marketplace.\n\nBase URL: {{baseUrl}}\n\nPre-request Script auto-sets auth tokens from login responses.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -16,11 +16,24 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"securepassword\",\n  \"role\": \"CUSTOMER\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register Technician",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mike Plumber\",\n  \"email\": \"mike@example.com\",\n  \"password\": \"securepassword\",\n  \"role\": \"TECHNICIAN\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
@@ -37,11 +50,7 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"securepassword\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -49,26 +58,40 @@
               "path": ["api", "auth", "login"]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Public Services",
-      "item": [
+        },
         {
-          "name": "Get All Services",
+          "name": "Refresh Token",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/services",
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "services"]
+              "path": ["api", "auth", "refresh-token"]
             }
           }
         },
         {
-          "name": "Get All Categories",
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories (Public)",
           "request": {
             "method": "GET",
             "header": [],
@@ -80,6 +103,506 @@
           }
         }
       ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Get All Services (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/services",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "services"]
+            }
+          }
+        },
+        {
+          "name": "Get Services with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/services?search=fix&categoryId=&minPrice=50&maxPrice=500",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "services"],
+              "query": [
+                { "key": "search", "value": "fix" },
+                { "key": "categoryId", "value": "" },
+                { "key": "minPrice", "value": "50" },
+                { "key": "maxPrice", "value": "500" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Service (Technician)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fix Leaky Pipe\",\n  \"price\": 150,\n  \"categoryId\": \"{{categoryId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/services",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "services"]
+            }
+          }
+        },
+        {
+          "name": "Update Service (Technician)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fix Leaky Pipe - Premium\",\n  \"price\": 200\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/services/{{serviceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "services", "{{serviceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Service (Technician)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/services/{{serviceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "services", "{{serviceId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{serviceId}}\",\n  \"scheduledTime\": \"2026-07-20T10:00:00.000Z\",\n  \"address\": \"123 Main Street, Dhaka\",\n  \"phone\": \"01712345678\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get My Bookings (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking Status (Technician/Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking (Customer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "cancel"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Initiate Payment (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "create"]
+            }
+          }
+        },
+        {
+          "name": "Payment Webhook (SSLCommerz)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"val_id\": \"<ssl_validation_id>\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/confirm?bookingId={{bookingId}}&tranId={{transactionId}}&status=success",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "confirm"],
+              "query": [
+                { "key": "bookingId", "value": "{{bookingId}}" },
+                { "key": "tranId", "value": "{{transactionId}}" },
+                { "key": "status", "value": "success" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Payments (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Details (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent service! Very professional and on time.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Technician Reviews (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/technician/{{technicianProfileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "technician", "{{technicianProfileId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"BANNED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/bookings?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "bookings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Categories (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Create Category (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Plumbing\",\n  \"slug\": \"plumbing\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Technicians (Public)",
+      "item": [
+        {
+          "name": "Get All Technicians (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/technicians",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technicians"]
+            }
+          }
+        },
+        {
+          "name": "Get Technicians with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/technicians?location=Dhaka&minRating=4",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technicians"],
+              "query": [
+                { "key": "location", "value": "Dhaka" },
+                { "key": "minRating", "value": "4" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Technician By ID (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/technicians/{{technicianProfileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technicians", "{{technicianProfileId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Technician Operations",
+      "item": [
+        {
+          "name": "Update Profile (Technician)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Expert plumber with 5 years of experience in residential and commercial plumbing.\",\n  \"location\": \"Dhaka\",\n  \"experience\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/technician/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technician", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Availability (Technician)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slots\": [\n    \"2026-07-20T09:00:00Z\",\n    \"2026-07-20T10:00:00Z\",\n    \"2026-07-20T14:00:00Z\",\n    \"2026-07-21T09:00:00Z\"\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/technician/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technician", "availability"]
+            }
+          }
+        },
+        {
+          "name": "Get Assigned Bookings (Technician)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/technician/bookings?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technician", "bookings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Advance Booking State (Technician)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{technicianToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/technician/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "technician", "bookings", "{{bookingId}}"]
+            }
+          }
+        }
+      ]
     }
   ],
   "event": [
@@ -87,14 +610,39 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "exec": [""]
+        "exec": [
+          "// Auto-set variables from login responses",
+          "const pmBody = pm.request.body?.raw;",
+          "if (pm.request.url.toString().includes('/auth/login')) {",
+          "  pm.variables.set('loginBody', pmBody);",
+          "}"
+        ]
       }
     },
     {
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [""]
+        "exec": [
+          "// Auto-capture tokens from login responses",
+          "const jsonData = pm.response.json();",
+          "if (jsonData?.data?.accessToken) {",
+          "  const email = JSON.parse(pm.variables.get('loginBody') || '{}')?.email;",
+          "  if (email?.includes('admin')) pm.collectionVariables.set('adminToken', jsonData.data.accessToken);",
+          "  else if (email?.includes('tech')) pm.collectionVariables.set('technicianToken', jsonData.data.accessToken);",
+          "  else pm.collectionVariables.set('customerToken', jsonData.data.accessToken);",
+          "}",
+          "",
+          "// Auto-capture IDs from responses",
+          "if (jsonData?.data?.id) {",
+          "  const url = pm.request.url.toString();",
+          "  if (url.includes('/services')) pm.collectionVariables.set('serviceId', jsonData.data.id);",
+          "  if (url.includes('/bookings')) pm.collectionVariables.set('bookingId', jsonData.data.id);",
+          "}",
+          "if (jsonData?.data?.gatewayUrl) {",
+          "  pm.collectionVariables.set('gatewayUrl', jsonData.data.gatewayUrl);",
+          "}"
+        ]
       }
     }
   ],
@@ -102,6 +650,56 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "customerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "technicianToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "serviceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bookingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "technicianProfileId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
       "type": "string"
     }
   ]

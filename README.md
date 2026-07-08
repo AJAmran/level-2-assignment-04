@@ -60,4 +60,51 @@ FixItNow is a robust, scalable backend API for a home services marketplace. It e
    ```
 
 ## API Documentation
-The complete API specification is available in the `swagger.yaml` file located in the project root. You can import this file directly into Swagger UI or Postman to explore and test the endpoints. Additionally, a `postman_collection.json` has been provided for ease of use.
+
+Full detailed API documentation is available in [`api-docs.md`](./api-docs.md).
+
+**Base URL:** `http://localhost:5000/api`
+
+**Auth:** JWT Bearer tokens via `Authorization: Bearer <token>` header or HTTP-only cookies.
+
+**Response Envelope:**
+```json
+{ "success": true, "statusCode": 200, "message": "...", "data": { ... }, "meta": { "page": 1, "limit": 10, "total": 100 } }
+```
+
+### Endpoints Overview
+
+| Method | Route                          | Access              | Description                        |
+|--------|--------------------------------|---------------------|------------------------------------|
+| POST   | `/api/auth/register`           | Public              | Register new user                  |
+| POST   | `/api/auth/login`              | Public              | Login                              |
+| POST   | `/api/auth/refresh-token`      | Public (cookie)     | Refresh access token               |
+| GET    | `/api/auth/me`                 | Authenticated       | Get current user profile           |
+| GET    | `/api/categories`              | Public              | List all categories                |
+| GET    | `/api/services`                | Public              | List services (with filters)       |
+| POST   | `/api/services`                | TECHNICIAN          | Create service                     |
+| PATCH  | `/api/services/:id`            | TECHNICIAN (owner)  | Update service                     |
+| DELETE | `/api/services/:id`            | TECHNICIAN (owner)  | Soft-delete service                |
+| POST   | `/api/bookings`                | CUSTOMER            | Create booking                     |
+| GET    | `/api/bookings`                | Authenticated       | List bookings (role-scoped)        |
+| GET    | `/api/bookings/:id`            | Authenticated       | Get booking details                |
+| PATCH  | `/api/bookings/:id/status`     | TECHNICIAN, ADMIN   | Update booking status              |
+| PATCH  | `/api/bookings/:id/cancel`     | CUSTOMER (owner)    | Cancel booking                     |
+| POST   | `/api/payments/create`         | CUSTOMER (owner)    | Initiate SSLCommerz payment        |
+| POST   | `/api/payments/confirm`        | Public (webhook)    | SSLCommerz payment callback        |
+| GET    | `/api/payments`                | CUSTOMER            | List own payments (paginated)      |
+| GET    | `/api/payments/:id`            | CUSTOMER (owner)    | Get payment details                |
+| POST   | `/api/reviews`                 | CUSTOMER (owner)    | Create review for completed booking|
+| GET    | `/api/reviews/technician/:id`  | Public              | Get reviews for a technician       |
+| GET    | `/api/admin/users`             | ADMIN               | List all users (paginated)         |
+| PATCH  | `/api/admin/users/:id`         | ADMIN               | Ban/activate user                  |
+| GET    | `/api/admin/bookings`          | ADMIN               | List all bookings (paginated)      |
+| GET    | `/api/admin/categories`        | ADMIN               | List all categories                |
+| POST   | `/api/admin/categories`        | ADMIN               | Create category                    |
+| GET    | `/api/technicians`             | Public              | List technician profiles           |
+| GET    | `/api/technicians/:id`         | Public              | Get technician profile with reviews|
+| PUT    | `/api/technician/profile`      | TECHNICIAN          | Upsert own profile                 |
+| PUT    | `/api/technician/availability` | TECHNICIAN          | Set availability slots             |
+| GET    | `/api/technician/bookings`     | TECHNICIAN          | Get assigned bookings (paginated)  |
+| PATCH  | `/api/technician/bookings/:id` | TECHNICIAN          | Update assigned booking status     |
+
