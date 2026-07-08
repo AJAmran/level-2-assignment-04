@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import { BookingService } from "../booking/booking.service";
 import { BookingStatus } from "../../../generated/prisma/client";
 
+/** Optional filters for listing technicians. */
 type TechnicianFilters = {
   location?: string;
   minRating?: string;
@@ -17,6 +18,7 @@ type TechnicianProfileUpdatePayload = {
   experience?: number;
 };
 
+/** Retrieve all technicians with optional location and minimum rating filters, ordered by rating descending. */
 const getAllTechnicians = async (filters: TechnicianFilters) => {
   const where: Record<string, unknown> = {};
   if (filters.location) {
@@ -38,6 +40,7 @@ const getAllTechnicians = async (filters: TechnicianFilters) => {
   });
 };
 
+/** Retrieve a single technician profile by ID, including services and reviews. */
 const getTechnicianById = async (id: string) => {
   const technician = await prisma.technicianProfile.findUnique({
     where: { id },
@@ -56,6 +59,11 @@ const getTechnicianById = async (id: string) => {
   return technician;
 };
 
+/**
+ * Update the authenticated technician's profile.
+ * Only whitelisted fields (bio, location, experience) are accepted.
+ * Uses upsert to create the profile if it doesn't exist yet.
+ */
 const updateProfile = async (
   userId: string,
   payload: TechnicianProfileUpdatePayload,
@@ -74,6 +82,7 @@ const updateProfile = async (
   });
 };
 
+/** Update the authenticated technician's availability slots. */
 const updateAvailability = async (userId: string, slots: string[]) => {
   const profile = await prisma.technicianProfile.findUnique({
     where: { userId },
@@ -89,6 +98,7 @@ const updateAvailability = async (userId: string, slots: string[]) => {
   });
 };
 
+/** Retrieve paginated assigned bookings for the authenticated technician. */
 const getAssignedBookings = async (
   userId: string,
   page: number = 1,
@@ -120,6 +130,10 @@ const getAssignedBookings = async (
   return { bookings, total, page, limit };
 };
 
+/**
+ * Advance a booking's state machine status.
+ * Delegates to BookingService for full state validation.
+ */
 const advanceBookingState = async (
   userId: string,
   bookingId: string,

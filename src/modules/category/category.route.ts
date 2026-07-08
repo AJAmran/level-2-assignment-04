@@ -1,3 +1,7 @@
+/**
+ * Category module routes.
+ * - GET / – List all categories (public)
+ */
 import { Router } from "express";
 import { categoryController } from "./category.controller";
 

@@ -1,8 +1,18 @@
+/**
+ * Review module business logic.
+ * Handles review creation with booking verification, duplicate guard,
+ * and technician rating aggregation.
+ */
 import { Review } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 
+/**
+ * Create a review for a completed booking.
+ * Validates rating range, booking ownership, completion status,
+ * and prevents duplicate reviews. Recalculates the technician's average rating.
+ */
 const createReview = async (
   customerId: string,
   payload: Pick<Review, "bookingId" | "rating" | "comment">,
@@ -73,6 +83,7 @@ const createReview = async (
   });
 };
 
+/** Retrieve all reviews for a technician profile, newest first. */
 const getTechnicianReviews = async (
   technicianProfileId: string,
 ): Promise<Review[]> => {

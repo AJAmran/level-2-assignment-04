@@ -1,3 +1,10 @@
+/**
+ * Payment module routes.
+ * - POST  /create   – Initiate an SSLCommerz payment session (customer-only)
+ * - POST  /confirm  – SSLCommerz webhook / redirect callback
+ * - GET   /         – List logged-in customer's payments
+ * - GET   /:id      – Get a single payment's details (customer-only)
+ */
 import { Router } from "express";
 import { authGuard } from "../../middlewares/authGuard";
 import { UserRole } from "../../../generated/prisma/enums";

@@ -1,9 +1,14 @@
+/**
+ * Admin module controllers.
+ * Handles HTTP request/response for admin dashboard operations.
+ */
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { AdminService } from "./admin.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
+/** Retrieve a paginated list of all users. */
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
@@ -16,6 +21,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Update a user's status (ACTIVE or BANNED). */
 const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const { status } = req.body;
@@ -28,6 +34,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve a paginated list of all bookings across the platform. */
 const getAllBookings = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
@@ -40,6 +47,7 @@ const getAllBookings = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve all categories ordered alphabetically. */
 const getAllCategories = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminService.getAllCategories();
   sendResponse(res, {
@@ -50,6 +58,7 @@ const getAllCategories = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Create a new category. */
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminService.createCategory(req.body);
   sendResponse(res, {

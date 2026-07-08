@@ -1,3 +1,7 @@
+/**
+ * Admin module business logic.
+ * Handles user management, platform-wide booking queries, and category CRUD.
+ */
 import { prisma } from "../../lib/prisma";
 
 type CategoryCreatePayload = {
@@ -5,6 +9,7 @@ type CategoryCreatePayload = {
   slug: string;
 };
 
+/** Retrieve a paginated list of all users ordered by creation date descending. */
 const getAllUsers = async (page: number = 1, limit: number = 20) => {
   const skip = (page - 1) * limit;
   const [users, total] = await prisma.$transaction([
@@ -26,6 +31,7 @@ const getAllUsers = async (page: number = 1, limit: number = 20) => {
   return { users, total, page, limit };
 };
 
+/** Update a user's status (ACTIVE or BANNED). Throws if the user does not exist. */
 const updateUserStatus = async (id: string, status: "ACTIVE" | "BANNED") => {
   // Ensure the user actually exists before updating
   const user = await prisma.user.findUnique({ where: { id } });
@@ -39,6 +45,7 @@ const updateUserStatus = async (id: string, status: "ACTIVE" | "BANNED") => {
   });
 };
 
+/** Retrieve a paginated list of all bookings with related customer, technician, and service data. */
 const getAllBookings = async (page: number = 1, limit: number = 20) => {
   const skip = (page - 1) * limit;
   const [bookings, total] = await prisma.$transaction([
@@ -62,10 +69,12 @@ const getAllBookings = async (page: number = 1, limit: number = 20) => {
   return { bookings, total, page, limit };
 };
 
+/** Retrieve all categories ordered alphabetically by name. */
 const getAllCategories = async () => {
   return await prisma.category.findMany({ orderBy: { name: "asc" } });
 };
 
+/** Create a new category with the given name and slug. */
 const createCategory = async (payload: CategoryCreatePayload) => {
   return await prisma.category.create({
     data: {

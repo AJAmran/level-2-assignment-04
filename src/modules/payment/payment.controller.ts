@@ -1,9 +1,14 @@
+/**
+ * Payment module controllers.
+ * Handles HTTP request/response for payment initiation, webhook, and retrieval.
+ */
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { PaymentService } from "./payment.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
+/** Initiate an SSLCommerz payment session for a given booking. */
 const checkout = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const { bookingId } = req.body;
@@ -47,6 +52,7 @@ const sslWebhook = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve the authenticated customer's payment history with pagination. */
 const getUserPayments = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const page = parseInt(req.query.page as string) || 1;
@@ -61,6 +67,7 @@ const getUserPayments = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve details for a single payment belonging to the authenticated customer. */
 const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const paymentId = req.params.id as string;

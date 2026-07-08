@@ -1,3 +1,7 @@
+/**
+ * Payment module business logic.
+ * Handles SSLCommerz payment initiation, server-side verification, and history retrieval.
+ */
 import axios from "axios";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
@@ -14,6 +18,11 @@ const generateTransactionId = (): string => {
   return `TXN-${timestamp}-${random}`;
 };
 
+/**
+ * Initiate an SSLCommerz payment session for a booking.
+ * Validates that the booking belongs to the user, is in ACCEPTED status,
+ * and has no existing duplicate/completed payment before creating a new session.
+ */
 const initiatePayment = async (
   bookingId: string,
   userId: string,
@@ -138,6 +147,10 @@ const verifySSLCommerzTransaction = async (
   }
 };
 
+/**
+ * Handle the SSLCommerz redirect/webhook callback.
+ * Verifies the transaction server-side before updating booking/payment records.
+ */
 const handleWebhookNotification = async (
   bookingId: string,
   tranId: string,
@@ -197,6 +210,9 @@ const handleWebhookNotification = async (
   });
 };
 
+/**
+ * Retrieve paginated payment history for a customer.
+ */
 const getUserPayments = async (
   userId: string,
   page: number = 1,
@@ -220,6 +236,10 @@ const getUserPayments = async (
   return { payments, total, page, limit };
 };
 
+/**
+ * Retrieve a single payment's details.
+ * Ensures the payment belongs to the requesting customer.
+ */
 const getPaymentDetails = async (userId: string, paymentId: string) => {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },

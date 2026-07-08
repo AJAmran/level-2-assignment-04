@@ -4,6 +4,9 @@ import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 import { TServiceFilterableFields } from "./service.interface";
 
+/**
+ * Create a new service offering.
+ */
 const createService = async (
   technicianId: string,
   payload: Omit<Service, "id" | "technicianId" | "isDeleted" | "updatedAt" | "createdAt">,
@@ -43,6 +46,10 @@ const createService = async (
   });
 };
 
+/**
+ * Retrieve all non-deleted services with optional filters.
+ * Supports search by name, category ID, and price range.
+ */
 const getAllServices = async (
   filters: TServiceFilterableFields,
 ): Promise<Service[]> => {
@@ -83,6 +90,10 @@ const getAllServices = async (
   });
 };
 
+/**
+ * Update a service offering.
+ * Ensures the requesting technician owns the service before updating.
+ */
 const updateService = async (
   userId: string,
   serviceId: string,
@@ -114,6 +125,10 @@ const updateService = async (
   });
 };
 
+/**
+ * Soft-delete a service offering.
+ * Ensures the requesting technician owns the service before marking it deleted.
+ */
 const deleteService = async (
   userId: string,
   serviceId: string,

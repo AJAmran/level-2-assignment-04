@@ -1,11 +1,17 @@
+/**
+ * Standardized API Response Helper
+ * Sends consistent JSON responses with a uniform envelope structure across all endpoints.
+ */
 import { Response } from "express";
 
+/** Pagination metadata included in paginated list responses */
 export interface IMeta {
   page: number;
   limit: number;
   total: number;
 }
 
+/** Generic response envelope shape */
 export interface IResponse<T, M = IMeta> {
   success: boolean;
   statusCode: number;
@@ -14,6 +20,7 @@ export interface IResponse<T, M = IMeta> {
   meta?: M;
 }
 
+/** Sends a standardized JSON response with the given status code and payload */
 export const sendResponse = <T, M = IMeta>(
   res: Response,
   { success, statusCode, message, data, meta }: IResponse<T, M>,

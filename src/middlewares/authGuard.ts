@@ -1,3 +1,9 @@
+/**
+ * Authentication & Authorization Guard Middleware
+ * Protects routes by verifying JWT access tokens from cookies or Authorization header.
+ * Optionally enforces role-based access control for specified roles.
+ * Attaches the authenticated user context (id, email, role) to req.user on success.
+ */
 import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../../generated/prisma/enums";
@@ -9,6 +15,7 @@ import { prisma } from "../lib/prisma";
 
 export const authGuard = (...requiredRoles: UserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    /** Extract token: priority = cookie > Bearer header > raw header */
     const token = req.cookies.accessToken
       ? req.cookies.accessToken
       : req.headers.authorization?.startsWith("Bearer ")
@@ -22,6 +29,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
       );
     }
 
+    /** Verify JWT signature and decode the payload */
     let decodedUser;
     try {
       decodedUser = jwtHelpers.verifyToken(token, config.jwt_access_secret);
@@ -32,6 +40,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
       );
     }
 
+    /** Ensure the user still exists in the database and is not soft-deleted */
     const user = await prisma.user.findUnique({
       where: {
         id: decodedUser.id,
@@ -46,6 +55,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
       );
     }
 
+    /** Reject banned users */
     if (user.status === "BANNED") {
       throw new ApiError(
         httpStatus.FORBIDDEN,
@@ -53,6 +63,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
       );
     }
 
+    /** If specific roles are required, check the user's role */
     if (requiredRoles.length && !requiredRoles.includes(user.role)) {
       throw new ApiError(
         403,
@@ -60,6 +71,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
       );
     }
 
+    /** Attach user context to the request for downstream controllers */
     req.user = {
       id: user.id,
       email: user.email,

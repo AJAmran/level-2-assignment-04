@@ -1,4 +1,3 @@
-import express, { type Express, type Request, type Response } from "express";
 import app from "./app";
 import { prisma } from "./lib/prisma";
 import config from "./config";
@@ -19,4 +18,8 @@ async function main() {
   }
 }
 
-main();
+if (!process.env.VERCEL) {
+  main();
+}
+
+export default app;

@@ -1,5 +1,10 @@
+/**
+ * Global Error Handler Middleware
+ * Catches all errors thrown (or forwarded via next()) and translates them into
+ * standardized JSON responses. Handles Zod validation errors, custom ApiErrors,
+ * Prisma database errors, and generic errors with appropriate status codes.
+ */
 import { ErrorRequestHandler } from "express";
-import { TErrorSources } from "../interfaces/error.interface.js";
 import { ApiError } from "./ApiError";
 import { ZodError } from "zod";
 import { Prisma } from "../../generated/prisma/client";
@@ -9,6 +14,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
   let message = "Something went wrong!";
   let errorDetails: any = err;
 
+  /** Zod validation errors -> 400 with field-level issue details */
   if (err instanceof ZodError) {
     statusCode = 400;
     message = "Validation Error";
@@ -19,6 +25,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
       })),
       name: "ZodError"
     };
+  /** Custom application errors -> use their assigned status code */
   } else if (err instanceof ApiError) {
     statusCode = err.statusCode;
     message = err.message;
@@ -26,6 +33,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
       path: "",
       message: err.message,
     };
+  /** Prisma unique constraint violation -> 409 Conflict */
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
       statusCode = 409;
@@ -48,7 +56,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
     };
   }
 
-  // Include stack trace if not in production
+  /** In non-production environments, include the stack trace for debugging */
   if (process.env.NODE_ENV !== "production" && err instanceof Error) {
     errorDetails = {
       ...errorDetails,
@@ -56,7 +64,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
     };
   }
 
-  // The requirement asks for success, message, errorDetails strictly.
+  /** Send the standardized error envelope */
   res.status(statusCode).json({
     success: false,
     message,

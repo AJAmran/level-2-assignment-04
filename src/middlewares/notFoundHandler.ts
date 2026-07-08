@@ -1,3 +1,7 @@
+/**
+ * 404 Not Found Handler
+ * Catches all unmatched routes and forwards a 404 ApiError to the global error handler.
+ */
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError.js";
 import httpStatus from "http-status";

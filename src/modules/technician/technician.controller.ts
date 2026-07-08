@@ -4,6 +4,7 @@ import { TechnicianService } from "./technician.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
+/** Retrieve all technicians with optional location/rating filters. */
 const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
   const filters = {
     location: req.query.location as string | undefined,
@@ -18,6 +19,7 @@ const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve a single technician's full profile by ID. */
 const getTechnicianById = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const result = await TechnicianService.getTechnicianById(id);
@@ -29,6 +31,7 @@ const getTechnicianById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Update the authenticated technician's profile (bio, location, experience). */
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const result = await TechnicianService.updateProfile(userId, req.body);
@@ -40,6 +43,7 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Update the authenticated technician's availability time slots. */
 const updateAvailability = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const result = await TechnicianService.updateAvailability(userId, req.body.slots);
@@ -51,6 +55,7 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Retrieve the authenticated technician's assigned bookings (paginated). */
 const getAssignedBookings = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const page = parseInt(req.query.page as string) || 1;
@@ -64,6 +69,7 @@ const getAssignedBookings = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Advance a booking's status (e.g. ACCEPTED -> IN_PROGRESS -> COMPLETED). */
 const advanceBookingState = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const bookingId = req.params.id as string;

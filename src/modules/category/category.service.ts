@@ -1,8 +1,16 @@
+/**
+ * Category module business logic.
+ * Handles category creation (with duplicate-name guard) and listing.
+ */
 import { Category } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 
+/**
+ * Create a new category.
+ * Rejects duplicate names and auto-generates a URL-safe slug.
+ */
 const createCategory = async (
   payload: Pick<Category, "name">,
 ): Promise<Category> => {
@@ -32,6 +40,7 @@ const createCategory = async (
   });
 };
 
+/** Retrieve all categories ordered alphabetically by name. */
 const getAllCategories = async (): Promise<Category[]> => {
   return prisma.category.findMany({
     orderBy: { name: "asc" },
