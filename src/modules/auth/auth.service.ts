@@ -46,6 +46,9 @@ const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
         email: payload.email,
         password: hashedPassword,
         role: payload.role,
+        name: payload.name,
+        phone: payload.phone,
+        address: payload.address,
       },
     });
 
