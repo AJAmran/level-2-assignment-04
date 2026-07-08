@@ -3,7 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { ServiceService } from "./service.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
-
+import { pick } from "../../utils/pick";
 
 const createService = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
@@ -18,20 +18,17 @@ const createService = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllServices = catchAsync(async (req: Request, res: Response) => {
-  const filters = {
-    search: req.query.search as string,
-    categoryId: req.query.categoryId as string,
-    minPrice: req.query.minPrice as string,
-    maxPrice: req.query.maxPrice as string,
-  };
+  const filters = pick(req.query, ["search", "categoryId", "minPrice", "maxPrice"]) as any;
+  const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
 
-  const result = await ServiceService.getAllServices(filters);
+  const result = await ServiceService.getAllServices(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Services Fetch Successfully",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

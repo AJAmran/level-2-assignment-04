@@ -3,6 +3,8 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
 import { TServiceFilterableFields } from "./service.interface";
+import { paginationHelpers } from "../../utils/paginationHelper";
+import { getTechnicianProfileOrThrow } from "../../utils/getTechnicianProfile";
 
 /**
  * Create a new service offering.
@@ -23,18 +25,10 @@ const createService = async (
     );
   }
 
-  const profile = await prisma.technicianProfile.findUnique({
-    where: {
-      userId: technicianId,
-    },
-  });
-
-  if (!profile) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      "Technician profile not found. Please complete your profile setup first.",
-    );
-  }
+  const profile = await getTechnicianProfileOrThrow(
+    technicianId,
+    "Technician profile not found. Please complete your profile setup first.",
+  );
 
   return await prisma.service.create({
     data: {
@@ -52,8 +46,10 @@ const createService = async (
  */
 const getAllServices = async (
   filters: TServiceFilterableFields,
-): Promise<Service[]> => {
+  options: any,
+) => {
   const { search, categoryId, minPrice, maxPrice } = filters;
+  const { page, limit, skip, sortBy, sortOrder } = paginationHelpers.calculatePagination(options);
   const whereConditions: Prisma.ServiceWhereInput = { isDeleted: false };
 
   if (search) {
@@ -74,8 +70,10 @@ const getAllServices = async (
     }
   }
 
-  return await prisma.service.findMany({
+  const result = await prisma.service.findMany({
     where: whereConditions,
+    skip,
+    take: limit,
     include: {
       category: true,
       technician: {
@@ -86,8 +84,19 @@ const getAllServices = async (
         },
       },
     },
-    orderBy: { price: "asc" },
+    orderBy: { [sortBy]: sortOrder },
   });
+
+  const total = await prisma.service.count({ where: whereConditions });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 /**
@@ -99,13 +108,7 @@ const updateService = async (
   serviceId: string,
   payload: Partial<Pick<Service, "name" | "price" | "categoryId">>,
 ): Promise<Service> => {
-  const profile = await prisma.technicianProfile.findUnique({
-    where: { userId },
-  });
-
-  if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
-  }
+  const profile = await getTechnicianProfileOrThrow(userId);
 
   const service = await prisma.service.findUnique({
     where: { id: serviceId, isDeleted: false },
@@ -133,13 +136,7 @@ const deleteService = async (
   userId: string,
   serviceId: string,
 ): Promise<Service> => {
-  const profile = await prisma.technicianProfile.findUnique({
-    where: { userId },
-  });
-
-  if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
-  }
+  const profile = await getTechnicianProfileOrThrow(userId);
 
   const service = await prisma.service.findUnique({
     where: { id: serviceId, isDeleted: false },

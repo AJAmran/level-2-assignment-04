@@ -16,6 +16,7 @@ import {
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";
 import httpStatus from "http-status";
+import { getTechnicianProfileOrThrow } from "../../utils/getTechnicianProfile";
 
 /**
  * Create a new booking for a customer.
@@ -79,17 +80,10 @@ const getUserBookings = async (
   if (role === UserRole.CUSTOMER) {
     queryConditions.customerId = userId;
   } else if (role === UserRole.TECHNICIAN) {
-    const profile = await prisma.technicianProfile.findUnique({
-      where: {
-        userId,
-      },
-    });
-    if (!profile) {
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        "Technician reference tracking map context missing",
-      );
-    }
+    const profile = await getTechnicianProfileOrThrow(
+      userId,
+      "Technician reference tracking map context missing",
+    );
 
     queryConditions.technicianId = profile.id;
   }
@@ -148,12 +142,8 @@ const getBookingDetails = async (
   }
 
   if (role === UserRole.TECHNICIAN) {
-    const profile = await prisma.technicianProfile.findUnique({
-      where: {
-        userId,
-      },
-    });
-    if (!profile || booking.technicianId !== profile.id) {
+    const profile = await getTechnicianProfileOrThrow(userId);
+    if (booking.technicianId !== profile.id) {
       throw new ApiError(
         httpStatus.FORBIDDEN,
         "Access Denied: Resource identity mismatch",
@@ -183,11 +173,7 @@ const updateBookingStateByTechnician = async (
   bookingId: string,
   targetStatus: BookingStatus,
 ): Promise<Booking> => {
-  const profile = await prisma.technicianProfile.findUnique({
-    where: { userId },
-  });
-  if (!profile)
-    throw new ApiError(404, "Technician credentials context missing");
+  const profile = await getTechnicianProfileOrThrow(userId, "Technician credentials context missing");
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId, isDeleted: false },
