@@ -13,33 +13,46 @@ const checkout = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Payment gateway initiated successfully",
-    data: gatewayUrl,
+    message: "Payment gateway initiated successfully. Redirect user to the returned URL.",
+    data: { gatewayUrl },
   });
 });
 
+/**
+ * SSLCommerz IPN / redirect callback handler.
+ * SSLCommerz sends bookingId & tranId in query params (our custom redirect URLs),
+ * but the actual verification data (val_id) is sent in the POST body.
+ * We read val_id from the body to verify the transaction server-side.
+ */
 const sslWebhook = catchAsync(async (req: Request, res: Response) => {
   const { bookingId, tranId, status } = req.query;
+  // SSLCommerz includes val_id in the POST body on success callbacks
+  const valId: string | undefined = req.body?.val_id;
 
   await PaymentService.handleWebhookNotification(
     bookingId as string,
     tranId as string,
     status as string,
-    req.body,
+    valId,
   );
 
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  // Since there is no frontend, return a JSON response instead of redirecting
+  const paymentStatus = status === "success" ? "Payment successful" : "Payment failed or cancelled";
 
-  if (status === "success") {
-    res.redirect(`${frontendUrl}/dashboard/bookings?payment=success`);
-  } else {
-    res.redirect(`${frontendUrl}/dashboard/bookings?payment=failed`);
-  }
+  sendResponse(res, {
+    statusCode: status === "success" ? httpStatus.OK : httpStatus.PAYMENT_REQUIRED,
+    success: status === "success",
+    message: paymentStatus,
+    data: { bookingId, status },
+  });
 });
 
 const getUserPayments = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  const result = await PaymentService.getUserPayments(userId);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await PaymentService.getUserPayments(userId, page, limit);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -51,6 +64,7 @@ const getUserPayments = catchAsync(async (req: Request, res: Response) => {
 const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const paymentId = req.params.id as string;
+
   const result = await PaymentService.getPaymentDetails(userId, paymentId);
   sendResponse(res, {
     statusCode: httpStatus.OK,

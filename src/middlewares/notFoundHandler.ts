@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError.js";
+import httpStatus from "http-status";
 
 export const notFoundHandler = (
   req: Request,
@@ -8,7 +9,7 @@ export const notFoundHandler = (
 ): void => {
   next(
     new ApiError(
-      404,
+      httpStatus.NOT_FOUND,
       `API Endpoint Not Found: Can't find ${req.originalUrl} on this server`,
     ),
   );

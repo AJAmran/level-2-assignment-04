@@ -53,8 +53,9 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
 
 const getAssignedBookings = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  // Resolve the technicianProfile ID from the userId
-  const result = await TechnicianService.getAssignedBookings(userId);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const result = await TechnicianService.getAssignedBookings(userId, page, limit);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

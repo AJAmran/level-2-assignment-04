@@ -48,8 +48,8 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
 
     if (user.status === "BANNED") {
       throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "Your account has been deactivated",
+        httpStatus.FORBIDDEN,
+        "Your account has been suspended. Please contact support.",
       );
     }
 

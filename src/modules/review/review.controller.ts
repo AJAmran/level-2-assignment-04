@@ -27,7 +27,7 @@ const getTechnicianReviews = catchAsync(async (req: Request, res: Response) => {
      throw new ApiError(httpStatus.BAD_REQUEST, "Technician ID is required")
   }
 
-  const result = await ReviewService.getTehnicianReviews(technicianId);
+  const result = await ReviewService.getTechnicianReviews(technicianId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

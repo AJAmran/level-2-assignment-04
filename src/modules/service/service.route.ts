@@ -16,4 +16,17 @@ router.post(
   ServiceController.createService,
 );
 
+router.patch(
+  "/:id",
+  authGuard(UserRole.TECHNICIAN),
+  validateRequest(GlobalValidations.updateServiceSchema),
+  ServiceController.updateService,
+);
+
+router.delete(
+  "/:id",
+  authGuard(UserRole.TECHNICIAN),
+  ServiceController.deleteService,
+);
+
 export const ServiceRoutes = router;

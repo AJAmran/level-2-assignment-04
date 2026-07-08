@@ -162,7 +162,7 @@ const updateBookingStateByTechnician = async (
 
   return await prisma.booking.update({
     where: { id: bookingId },
-    data: { status: targetStatus as any },
+    data: { status: targetStatus },
   });
 };
 
@@ -181,10 +181,19 @@ const cancelBookingByCustomer = async (
   }
 
   // Enforce termination boundary constraints
-  if (booking.status === "IN_PROGRESS" || booking.status === "COMPLETED") {
+  // Per requirements: customer can cancel before IN_PROGRESS
+  // PAID bookings require a refund flow before cancellation
+  const nonCancellableStatuses: BookingStatus[] = [
+    "PAID",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "DECLINED",
+    "CANCELLED",
+  ];
+  if (nonCancellableStatuses.includes(booking.status)) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "Cancellation rejected: Service is already actively in execution flow",
+      `Cancellation not allowed: Booking is currently ${booking.status}. Only REQUESTED or ACCEPTED bookings can be cancelled.`,
     );
   }
 

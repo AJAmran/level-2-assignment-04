@@ -9,13 +9,24 @@ type TechnicianFilters = {
   minRating?: string;
 };
 
+// Strict whitelist type for profile update — prevents injecting
+// sensitive fields like rating, userId, or id via the API
+type TechnicianProfileUpdatePayload = {
+  bio?: string;
+  location?: string;
+  experience?: number;
+};
+
 const getAllTechnicians = async (filters: TechnicianFilters) => {
-  const where: any = {};
+  const where: Record<string, unknown> = {};
   if (filters.location) {
     where.location = { contains: filters.location, mode: "insensitive" };
   }
   if (filters.minRating) {
-    where.rating = { gte: parseFloat(filters.minRating) };
+    const rating = parseFloat(filters.minRating);
+    if (!isNaN(rating)) {
+      where.rating = { gte: rating };
+    }
   }
   return await prisma.technicianProfile.findMany({
     where,
@@ -40,53 +51,86 @@ const getTechnicianById = async (id: string) => {
     },
   });
   if (!technician) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Technician not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician not found.");
   }
   return technician;
 };
 
-const updateProfile = async (userId: string, payload: any) => {
+const updateProfile = async (
+  userId: string,
+  payload: TechnicianProfileUpdatePayload,
+) => {
+  // Only allow whitelisted fields — never let bio/location/experience
+  // carry through any extra keys from the request body
+  const safePayload: TechnicianProfileUpdatePayload = {};
+  if (payload.bio !== undefined) safePayload.bio = payload.bio;
+  if (payload.location !== undefined) safePayload.location = payload.location;
+  if (payload.experience !== undefined) safePayload.experience = payload.experience;
+
   return await prisma.technicianProfile.upsert({
     where: { userId },
-    update: payload,
-    create: { userId, ...payload },
+    update: safePayload,
+    create: { userId, ...safePayload },
   });
 };
 
 const updateAvailability = async (userId: string, slots: string[]) => {
-  const profile = await prisma.technicianProfile.findUnique({ where: { userId } });
+  const profile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
   if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
   }
-  // Availability is stored as a JSON array of ISO time strings
-  // Use raw query since client types are generated before migration for this new field
-  await prisma.$executeRawUnsafe(
-    `UPDATE technician_profiles SET availability = $1::jsonb, "updatedAt" = NOW() WHERE "userId" = $2`,
-    JSON.stringify(slots),
-    userId
-  );
-  return await prisma.technicianProfile.findUnique({ where: { userId } });
-};
 
-const getAssignedBookings = async (userId: string) => {
-  // Resolve the technicianProfile from the userId
-  const profile = await prisma.technicianProfile.findUnique({ where: { userId } });
-  if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found");
-  }
-  return await prisma.booking.findMany({
-    where: { technicianId: profile.id, isDeleted: false },
-    include: {
-      customer: { select: { id: true, name: true, email: true } },
-      service: true,
-    },
-    orderBy: { createdAt: "desc" },
+  // Prisma handles Json fields natively — no raw SQL needed
+  return await prisma.technicianProfile.update({
+    where: { userId },
+    data: { availability: slots },
   });
 };
 
-const advanceBookingState = async (userId: string, bookingId: string, targetStatus: BookingStatus) => {
+const getAssignedBookings = async (
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const profile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+  if (!profile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
+  }
+
+  const skip = (page - 1) * limit;
+  const [bookings, total] = await prisma.$transaction([
+    prisma.booking.findMany({
+      where: { technicianId: profile.id, isDeleted: false },
+      include: {
+        customer: { select: { id: true, name: true, email: true } },
+        service: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.booking.count({
+      where: { technicianId: profile.id, isDeleted: false },
+    }),
+  ]);
+  return { bookings, total, page, limit };
+};
+
+const advanceBookingState = async (
+  userId: string,
+  bookingId: string,
+  targetStatus: BookingStatus,
+) => {
   // Delegate to BookingService which has full state-machine validation
-  return await BookingService.updateBookingStateByTechnician(userId, bookingId, targetStatus);
+  return await BookingService.updateBookingStateByTechnician(
+    userId,
+    bookingId,
+    targetStatus,
+  );
 };
 
 export const TechnicianService = {
@@ -97,4 +141,3 @@ export const TechnicianService = {
   getAssignedBookings,
   advanceBookingState,
 };
-

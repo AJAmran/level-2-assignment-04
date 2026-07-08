@@ -34,18 +34,18 @@ const createReview = async (
     );
   }
 
-  // 4. Check for existing reviews to prevent duplicates
-  const existingReview = await prisma.review.findUnique({
-    where: { bookingId: payload.bookingId },
-  });
-  if (existingReview) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Constraint Error: Feedback has already been submitted for this booking",
-    );
-  }
-
   return await prisma.$transaction(async (tx) => {
+    // Check for existing review INSIDE the transaction to prevent race conditions
+    const existingReview = await tx.review.findUnique({
+      where: { bookingId: payload.bookingId },
+    });
+    if (existingReview) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "A review has already been submitted for this booking.",
+      );
+    }
+
     const reviewResult = await tx.review.create({
       data: {
         bookingId: payload.bookingId,
@@ -56,15 +56,14 @@ const createReview = async (
       },
     });
 
-    // Calculate the new average score for the technician
+    // Recalculate and update the technician's average rating
     const aggregateData = await tx.review.aggregate({
       where: { technicianId: booking.technicianId },
       _avg: { rating: true },
     });
 
-    const newAverageRating = aggregateData._avg.rating || 0.0;
+    const newAverageRating = aggregateData._avg.rating ?? 0.0;
 
-    // Update the technician's profile score directly
     await tx.technicianProfile.update({
       where: { id: booking.technicianId },
       data: { rating: parseFloat(newAverageRating.toFixed(1)) },
@@ -74,14 +73,14 @@ const createReview = async (
   });
 };
 
-const getTehnicianReviews = async (
+const getTechnicianReviews = async (
   technicianProfileId: string,
 ): Promise<Review[]> => {
   return await prisma.review.findMany({
     where: { technicianId: technicianProfileId },
     include: {
       customer: {
-        select: { id: true, email: true },
+        select: { id: true, email: true, name: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -90,5 +89,5 @@ const getTehnicianReviews = async (
 
 export const ReviewService = {
   createReview,
-  getTehnicianReviews,
+  getTechnicianReviews,
 };

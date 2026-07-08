@@ -5,7 +5,7 @@ import httpStatus from "http-status";
 import { TServiceFilterableFields } from "./service.interface";
 
 const createService = async (
-  technicanId: string,
+  technicianId: string,
   payload: Omit<Service, "id" | "technicianId" | "isDeleted" | "updatedAt" | "createdAt">,
 ): Promise<Service> => {
   //verify target Category existence
@@ -16,20 +16,20 @@ const createService = async (
   if (!categoryExists) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
-      "Invalid mapping context: Category not found",
+      "Category not found.",
     );
   }
 
   const profile = await prisma.technicianProfile.findUnique({
     where: {
-      userId: technicanId,
+      userId: technicianId,
     },
   });
 
   if (!profile) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
-      "Technician reference matrix context missing",
+      "Technician profile not found. Please complete your profile setup first.",
     );
   }
 
@@ -83,7 +83,70 @@ const getAllServices = async (
   });
 };
 
+const updateService = async (
+  userId: string,
+  serviceId: string,
+  payload: Partial<Pick<Service, "name" | "price" | "categoryId">>,
+): Promise<Service> => {
+  const profile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!profile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
+  }
+
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId, isDeleted: false },
+  });
+
+  if (!service) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Service not found.");
+  }
+
+  if (service.technicianId !== profile.id) {
+    throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to update this service.");
+  }
+
+  return await prisma.service.update({
+    where: { id: serviceId },
+    data: payload,
+  });
+};
+
+const deleteService = async (
+  userId: string,
+  serviceId: string,
+): Promise<Service> => {
+  const profile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!profile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
+  }
+
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId, isDeleted: false },
+  });
+
+  if (!service) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Service not found.");
+  }
+
+  if (service.technicianId !== profile.id) {
+    throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to delete this service.");
+  }
+
+  return await prisma.service.update({
+    where: { id: serviceId },
+    data: { isDeleted: true },
+  });
+};
+
 export const ServiceService = {
   createService,
   getAllServices,
+  updateService,
+  deleteService,
 };

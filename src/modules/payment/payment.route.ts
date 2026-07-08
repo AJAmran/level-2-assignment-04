@@ -14,7 +14,15 @@ router.post(
   paymentController.checkout,
 );
 router.post("/confirm", paymentController.sslWebhook);
-router.get("/", authGuard(UserRole.CUSTOMER), paymentController.getUserPayments);
-router.get("/:id", authGuard(UserRole.CUSTOMER), paymentController.getPaymentDetails);
+router.get(
+  "/",
+  authGuard(UserRole.CUSTOMER),
+  paymentController.getUserPayments,
+);
+router.get(
+  "/:id",
+  authGuard(UserRole.CUSTOMER),
+  paymentController.getPaymentDetails,
+);
 
 export const PaymentRoutes = router;

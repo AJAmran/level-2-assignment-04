@@ -5,7 +5,9 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminService.getAllUsers();
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const result = await AdminService.getAllUsers(page, limit);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -27,7 +29,9 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllBookings = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminService.getAllBookings();
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const result = await AdminService.getAllBookings(page, limit);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

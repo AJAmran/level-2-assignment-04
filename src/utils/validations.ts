@@ -9,14 +9,19 @@ const createBookingSchema = z.object({
 
 const createCategorySchema = z.object({
   name: z.string().min(3, "Category name must be at least 3 characters"),
-  description: z.string().optional(),
+  slug: z.string().min(3, "Category slug must be at least 3 characters"),
 });
 
 const createServiceSchema = z.object({
   name: z.string().min(3, "Service name must be at least 3 characters"),
-  description: z.string().optional(),
   price: z.number().positive("Price must be a positive number"),
   categoryId: z.string().uuid("Category ID must be a valid UUID"),
+});
+
+const updateServiceSchema = z.object({
+  name: z.string().min(3, "Service name must be at least 3 characters").optional(),
+  price: z.number().positive("Price must be a positive number").optional(),
+  categoryId: z.string().uuid("Category ID must be a valid UUID").optional(),
 });
 
 const createReviewSchema = z.object({
@@ -61,4 +66,5 @@ export const GlobalValidations = {
   updateBookingStatusSchema,
   updateUserStatusSchema,
   createPaymentSchema,
+  updateServiceSchema,
 };
