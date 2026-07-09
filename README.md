@@ -34,17 +34,20 @@ FixItNow is a robust, scalable backend API for a home services marketplace. It e
    npm install
    ```
 3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` (if provided) and fill in the following:
-   ```env
-   NODE_ENV=development
-   PORT=5000
-   DATABASE_URL="postgresql://user:password@localhost:5432/fixitnow"
-   JWT_ACCESS_SECRET="your_access_secret"
-   JWT_REFRESH_SECRET="your_refresh_secret"
-   STORE_ID="your_sslcommerz_store_id"
-   STORE_PASS="your_sslcommerz_store_pass"
-   APP_URL="http://localhost:5000"
-   ```
+    Copy `.env.example` to `.env` (if provided) and fill in the following:
+    ```env
+    NODE_ENV=
+    PORT=
+    DATABASE_URL=""
+    JWT_ACCESS_SECRET=""
+    JWT_REFRESH_SECRET=""
+    JWT_ACCESS_EXPIRES_IN=
+    JWT_REFRESH_EXPIRES_IN=
+    SALT_ROUNDS=
+    Store_ID=""
+    Store_Password=""
+    APP_URL=""
+    ```
 4. **Run Database Migrations**:
    ```bash
    npm run prisma:migrate
@@ -53,7 +56,6 @@ FixItNow is a robust, scalable backend API for a home services marketplace. It e
    ```bash
    npm run seed
    ```
-   *This creates the default admin user: `admin@fixitnow.com` with password `admin12345`.*
 6. **Start the Development Server**:
    ```bash
    npm run dev
@@ -134,11 +136,11 @@ Full detailed API documentation is available in [`api-docs.md`](./api-docs.md).
 | POST   | `/api/services`                | TECHNICIAN          | Create service                     |
 | PATCH  | `/api/services/:id`            | TECHNICIAN (owner)  | Update service                     |
 | DELETE | `/api/services/:id`            | TECHNICIAN (owner)  | Soft-delete service                |
-| POST   | `/api/bookings`                | CUSTOMER            | Create booking                     |
+| POST   | `/api/bookings`                | CUSTOMER            | Create booking (serviceId, scheduledTime) |
 | GET    | `/api/bookings`                | Authenticated       | List bookings (role-scoped)        |
 | GET    | `/api/bookings/:id`            | Authenticated       | Get booking details                |
-| PATCH  | `/api/bookings/:id/status`     | TECHNICIAN, ADMIN   | Update booking status              |
-| PATCH  | `/api/bookings/:id/cancel`     | CUSTOMER (owner)    | Cancel booking                     |
+| PATCH  | `/api/bookings/:id/status`     | TECHNICIAN, ADMIN   | Update booking status (ACCEPTED/DECLINED/IN_PROGRESS/COMPLETED) |
+| PATCH  | `/api/bookings/:id/cancel`     | CUSTOMER (owner)    | Cancel booking (only when REQUESTED or ACCEPTED) |
 | POST   | `/api/payments/create`         | CUSTOMER (owner)    | Initiate SSLCommerz payment        |
 | POST   | `/api/payments/confirm`        | Public (webhook)    | SSLCommerz payment callback        |
 | GET    | `/api/payments`                | CUSTOMER            | List own payments (paginated)      |
