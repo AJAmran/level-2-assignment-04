@@ -1,7 +1,3 @@
-/**
- * Standardized API Response Helper
- * Sends consistent JSON responses with a uniform envelope structure across all endpoints.
- */
 import { Response } from "express";
 
 /** Pagination metadata included in paginated list responses */

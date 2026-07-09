@@ -4,14 +4,11 @@ import httpStatus from "http-status";
 import { BookingService } from "../booking/booking.service";
 import { BookingStatus } from "../../../generated/prisma/client";
 
-/** Optional filters for listing technicians. */
 type TechnicianFilters = {
   location?: string;
   minRating?: string;
 };
 
-// Strict whitelist type for profile update — prevents injecting
-// sensitive fields like rating, userId, or id via the API
 type TechnicianProfileUpdatePayload = {
   bio?: string;
   location?: string;
@@ -61,19 +58,18 @@ const getTechnicianById = async (id: string) => {
 
 /**
  * Update the authenticated technician's profile.
- * Only whitelisted fields (bio, location, experience) are accepted.
  * Uses upsert to create the profile if it doesn't exist yet.
  */
 const updateProfile = async (
   userId: string,
   payload: TechnicianProfileUpdatePayload,
 ) => {
-  // Only allow whitelisted fields — never let bio/location/experience
   // carry through any extra keys from the request body
   const safePayload: TechnicianProfileUpdatePayload = {};
   if (payload.bio !== undefined) safePayload.bio = payload.bio;
   if (payload.location !== undefined) safePayload.location = payload.location;
-  if (payload.experience !== undefined) safePayload.experience = payload.experience;
+  if (payload.experience !== undefined)
+    safePayload.experience = payload.experience;
 
   return await prisma.technicianProfile.upsert({
     where: { userId },
@@ -91,7 +87,6 @@ const updateAvailability = async (userId: string, slots: string[]) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
   }
 
-  // Prisma handles Json fields natively — no raw SQL needed
   return await prisma.technicianProfile.update({
     where: { userId },
     data: { availability: slots },
@@ -139,7 +134,6 @@ const advanceBookingState = async (
   bookingId: string,
   targetStatus: BookingStatus,
 ) => {
-  // Delegate to BookingService which has full state-machine validation
   return await BookingService.updateBookingStateByTechnician(
     userId,
     bookingId,

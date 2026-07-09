@@ -39,7 +39,7 @@ const getBookingDetails = catchAsync(async (req: Request, res: Response) => {
   const result = await BookingService.getBookingDetails(bookingId, id, role);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Booking details record structured successfully",
     data: result,
@@ -62,9 +62,9 @@ const updateBookingStateByTechnician = catchAsync(
     );
 
     sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: `Booking state successfully transformed to ${req.body.status}`,
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `Booking state successfully transformed to ${req.body.status}`,
       data: result,
     });
   },
@@ -84,7 +84,7 @@ const cancelBooking = catchAsync(async (req: Request, res: Response) => {
   );
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Booking cancellation request processed successfully",
     data: result,

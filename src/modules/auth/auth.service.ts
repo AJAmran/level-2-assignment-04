@@ -13,14 +13,6 @@ import { User } from "../../../generated/prisma/client";
 
 /**
  * Register a new user account.
- *
- * Checks for duplicate email, hashes the password, creates the user
- * (and optionally a TechnicianProfile for TECHNICIAN role) in a transaction,
- * then returns the new user data without the password field.
- *
- * @param payload - User input data (email, password, role, etc.)
- * @returns The created user object with the password omitted.
- * @throws ApiError 400 — if the email is already registered.
  */
 const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
   const isUserExist = await prisma.user.findUnique({
@@ -70,14 +62,6 @@ const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
 /**
  * Authenticate a user with email and password.
  *
- * Validates credentials, checks account status, generates JWT access and
- * refresh tokens, and returns them alongside the user profile (without password).
- *
- * @param payload - Object containing email and plaintext password.
- * @returns An object containing accessToken, refreshToken, and sanitised user data.
- * @throws ApiError 404 — if no user exists with the given email.
- * @throws ApiError 403 — if the user's account is banned.
- * @throws ApiError 401 — if the password does not match.
  */
 const loginUser = async (
   payload: Pick<User, "email" | "password">,
@@ -88,14 +72,14 @@ const loginUser = async (
 
   if (!user) {
     throw new ApiError(
-      404,
+      httpStatus.NOT_FOUND,
       "No account discovered matching that email address",
     );
   }
 
   if (user.status === "BANNED") {
     throw new ApiError(
-      403,
+      httpStatus.FORBIDDEN,
       "Access Denied: Your profile context has been banned",
     );
   }
@@ -107,7 +91,7 @@ const loginUser = async (
 
   if (!isPasswordMatched) {
     throw new ApiError(
-      401,
+      httpStatus.UNAUTHORIZED,
       "Authentication failed: Incorrect password credentials",
     );
   }
@@ -135,12 +119,6 @@ const loginUser = async (
 
 /**
  * Rotate (refresh) an existing session by verifying the refresh token
- * and issuing a new access token.
- *
- * @param token - The refresh token from the client.
- * @returns An object containing the newly generated access token.
- * @throws ApiError 401 — if the refresh token is invalid or expired.
- * @throws ApiError 403 — if the user no longer exists or is banned.
  */
 const rotateSessionToken = async (
   token: string,
@@ -181,12 +159,6 @@ const rotateSessionToken = async (
 
 /**
  * Retrieve the authenticated user's full profile.
- * Optionally includes the technicianProfile relation for TECHNICIAN roles.
- *
- * @param id   - The user's unique identifier.
- * @param role - The user's role (used to conditionally include relations).
- * @returns The user object with password excluded and optional related profiles.
- * @throws ApiError 404 — if the user is not found or is soft-deleted.
  */
 const getMe = async (id: string, role: string): Promise<TUserResponse> => {
   const user = await prisma.user.findUnique({

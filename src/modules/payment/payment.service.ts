@@ -6,7 +6,6 @@ import httpStatus from "http-status";
 
 /**
  * Generate a unique transaction ID using timestamp + random suffix.
- * The random suffix prevents millisecond-level collisions.
  */
 const generateTransactionId = (): string => {
   const timestamp = Date.now();

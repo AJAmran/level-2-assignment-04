@@ -60,7 +60,7 @@ export const authGuard = (...requiredRoles: UserRole[]) => {
     /** If specific roles are required, check the user's role */
     if (requiredRoles.length && !requiredRoles.includes(user.role)) {
       throw new ApiError(
-        403,
+        httpStatus.FORBIDDEN,
         "Forbidden: You do not have permission to perform this action",
       );
     }

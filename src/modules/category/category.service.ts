@@ -1,7 +1,3 @@
-/**
- * Category module business logic.
- * Handles category creation (with duplicate-name guard) and listing.
- */
 import { Category } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/ApiError";

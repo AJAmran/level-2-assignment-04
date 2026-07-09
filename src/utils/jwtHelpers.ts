@@ -1,8 +1,3 @@
-/**
- * JWT Utility Functions
- * Provides consistent token generation and verification.
- * Used by the auth module for access/refresh token lifecycle management.
- */
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
 /** Create a signed JWT with the given payload and expiry duration */

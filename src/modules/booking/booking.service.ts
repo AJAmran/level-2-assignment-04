@@ -1,13 +1,3 @@
-/**
- * Booking service layer.
- *
- * Contains all business logic for booking operations:
- * - Creating bookings with service validation
- * - Retrieving bookings with role-based filtering
- * - Updating booking statuses via a state machine
- * - Handling customer-initiated cancellations
- */
-
 import {
   Booking,
   BookingStatus,
@@ -20,14 +10,6 @@ import { getTechnicianProfileOrThrow } from "../../utils/getTechnicianProfile";
 
 /**
  * Create a new booking for a customer.
- *
- * Validates that the selected service exists and is not deleted,
- * then creates a booking in 'REQUESTED' status linked to the service's technician.
- *
- * @param customerId - The authenticated customer's ID.
- * @param payload    - The booking payload containing `serviceId` and `scheduledTime`.
- * @returns The created booking record.
- * @throws ApiError 404 if the service is not found.
  */
 const createBooking = async (
   customerId: string,
@@ -60,15 +42,6 @@ const createBooking = async (
 
 /**
  * Retrieve bookings for the authenticated user.
- *
- * - Admins see all non-deleted bookings.
- * - Customers see only their own bookings.
- * - Technicians see bookings assigned to them (resolved via their profile).
- *
- * @param userId - The authenticated user's ID.
- * @param role   - The authenticated user's role.
- * @returns An array of matching bookings with related customer, service, and technician data.
- * @throws ApiError 404 if a technician profile is not found.
  */
 const getUserBookings = async (
   userId: string,
@@ -101,18 +74,6 @@ const getUserBookings = async (
 
 /**
  * Retrieve detailed information for a single booking.
- *
- * Enforces access control:
- * - Customers can only view their own bookings.
- * - Technicians can only view bookings assigned to them.
- * - Admins have unrestricted access.
- *
- * @param bookingId - The target booking ID.
- * @param userId    - The authenticated user's ID.
- * @param role      - The authenticated user's role.
- * @returns The booking record with customer and service relations.
- * @throws ApiError 404 if the booking is not found.
- * @throws ApiError 403 if the user is not authorized to view the booking.
  */
 const getBookingDetails = async (
   bookingId: string,
@@ -155,18 +116,6 @@ const getBookingDetails = async (
 
 /**
  * Transition a booking to a new status (technician/admin operation).
- *
- * Enforces a state machine with the following rules:
- * - REQUESTED  → ACCEPTED | DECLINED
- * - PAID       → IN_PROGRESS
- * - IN_PROGRESS → COMPLETED
- *
- * @param userId       - The authenticated technician's user ID.
- * @param bookingId    - The target booking ID.
- * @param targetStatus - The desired new status.
- * @returns The updated booking record.
- * @throws ApiError 404 if the technician profile or booking is not found/mismatched.
- * @throws ApiError 400 if the requested state transition is invalid.
  */
 const updateBookingStateByTechnician = async (
   userId: string,
@@ -217,16 +166,6 @@ const updateBookingStateByTechnician = async (
 
 /**
  * Cancel a booking on behalf of the owning customer.
- *
- * Only bookings in 'REQUESTED' or 'ACCEPTED' status can be cancelled.
- * Bookings in 'PAID', 'IN_PROGRESS', 'COMPLETED', 'DECLINED', or 'CANCELLED'
- * status are considered non-cancellable.
- *
- * @param userId    - The authenticated customer's user ID.
- * @param bookingId - The target booking ID.
- * @returns The updated booking record with status set to 'CANCELLED'.
- * @throws ApiError 404 if the booking is not found or doesn't belong to the customer.
- * @throws ApiError 400 if the booking is in a non-cancellable state.
  */
 const cancelBookingByCustomer = async (
   userId: string,
