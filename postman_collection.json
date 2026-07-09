@@ -26,23 +26,6 @@
           }
         },
         {
-          "name": "Register Technician",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Mike Plumber\",\n  \"email\": \"mike@example.com\",\n  \"password\": \"securepassword\",\n  \"role\": \"TECHNICIAN\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "register"]
-            }
-          }
-        },
-        {
           "name": "Login",
           "request": {
             "method": "POST",

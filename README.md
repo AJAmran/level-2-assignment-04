@@ -59,6 +59,55 @@ FixItNow is a robust, scalable backend API for a home services marketplace. It e
    npm run dev
    ```
 
+## Booking & Payment Workflow
+
+```
+  CUSTOMER             TECHNICIAN          SSLCOMMERZ
+    |                     |                    |
+    |-- POST /bookings -->|                    |     (status: REQUESTED)
+    |                     |                    |
+    |                     |<--- PATCH status --|     (status: ACCEPTED)
+    |                     |  to "ACCEPTED"     |
+    |                     |                    |
+    |-- POST /payments ---|--------------------|-->  (status: PENDING)
+    |   /create           |                    |     Returns GatewayPageURL
+    |                     |                    |
+    |-- Redirect to ------|--------------------|-->  Customer pays on
+    |   SSLCommerz page   |                    |     SSLCommerz sandbox
+    |                     |                    |
+    |<--- Callback -------|--------------------|     POST /api/payments/confirm
+    |   (success)         |                    |     Server validates with val_id
+    |                     |                    |
+    |   Booking: PAID ----|                    |     (status: PAID)
+    |   Payment: COMPLETED|                    |
+    |                     |                    |
+    |                     |-- PATCH status --->|     (status: IN_PROGRESS)
+    |                     |  to "IN_PROGRESS"  |
+    |                     |                    |
+    |                     |-- PATCH status --->|     (status: COMPLETED)
+    |                     |  to "COMPLETED"    |
+    |                     |                    |
+    |-- POST /api/reviews-|--------------------|     (optional review)
+```
+
+**Status state machine:**
+
+```
+REQUESTED --> ACCEPTED --> PAID --> IN_PROGRESS --> COMPLETED
+    |             |             |
+    v             v             v
+CANCELLED     DECLINED    (no refund flow)
+```
+
+### Payment Details
+- **Gateway:** SSLCommerz (sandbox mode)
+- **Currency:** BDT (Bangladeshi Taka)
+- **Validation:** Server-side `val_id` verification before marking payment as COMPLETED
+- **Retry:** If payment FAILED, customer can retry on the same booking
+- **Cancellation:** Once PAID, booking cannot be cancelled (no refund endpoint implemented)
+
+---
+
 ## API Documentation
 
 Full detailed API documentation is available in [`api-docs.md`](./api-docs.md).
