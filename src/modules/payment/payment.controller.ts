@@ -20,7 +20,7 @@ const checkout = catchAsync(async (req: Request, res: Response) => {
 
 const sslWebhook = catchAsync(async (req: Request, res: Response) => {
   const { bookingId, tranId, status } = req.query;
-    const valId: string | undefined = req.body?.val_id;
+  const valId = (req.body?.val_id || req.query?.val_id) as string | undefined;
 
   await PaymentService.handleWebhookNotification(
     bookingId as string,

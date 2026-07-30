@@ -31,7 +31,7 @@ const getTechnicianById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Update the authenticated technician's profile (bio, location, experience). */
+/** Update the authenticated technician's profile. */
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const result = await TechnicianService.updateProfile(userId, req.body);
@@ -43,19 +43,93 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Update the authenticated technician's availability time slots. */
-const updateAvailability = catchAsync(async (req: Request, res: Response) => {
+// ── Slot Management ─────────────────────────────────────────────────────
+
+const createSlots = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  const result = await TechnicianService.updateAvailability(userId, req.body.slots);
+  const result = await TechnicianService.createSlots(userId, req.body.slots);
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
     success: true,
-    message: "Technician availability updated successfully",
+    message: "Slots created successfully",
     data: result,
   });
 });
 
-/** Retrieve the authenticated technician's assigned bookings (paginated). */
+const getMySlots = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const result = await TechnicianService.getMySlots(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Slots retrieved successfully",
+    data: result,
+  });
+});
+
+const deleteSlot = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const slotId = req.params.id as string;
+  const result = await TechnicianService.deleteSlot(userId, slotId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Slot deleted successfully",
+    data: result,
+  });
+});
+
+/** Public: get available slots for a technician. */
+const getTechnicianSlots = catchAsync(async (req: Request, res: Response) => {
+  const technicianId = req.params.id as string;
+  const result = await TechnicianService.getTechnicianSlots(technicianId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Available slots retrieved successfully",
+    data: result,
+  });
+});
+
+// ── Service Linking ─────────────────────────────────────────────────────
+
+const linkService = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const { serviceId } = req.body;
+  const result = await TechnicianService.linkService(userId, serviceId);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Service linked successfully",
+    data: result,
+  });
+});
+
+const unlinkService = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const serviceId = req.params.serviceId as string;
+  const result = await TechnicianService.unlinkService(userId, serviceId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Service unlinked successfully",
+    data: result,
+  });
+});
+
+const getMyServices = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const result = await TechnicianService.getMyServices(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Your services retrieved successfully",
+    data: result,
+  });
+});
+
+// ── Bookings ─────────────────────────────────────────────────────────────
+
 const getAssignedBookings = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const page = parseInt(req.query.page as string) || 1;
@@ -69,7 +143,6 @@ const getAssignedBookings = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/** Advance a booking's status (e.g. ACCEPTED -> IN_PROGRESS -> COMPLETED). */
 const advanceBookingState = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const bookingId = req.params.id as string;
@@ -87,8 +160,13 @@ export const TechnicianController = {
   getAllTechnicians,
   getTechnicianById,
   updateProfile,
-  updateAvailability,
+  createSlots,
+  getMySlots,
+  deleteSlot,
+  getTechnicianSlots,
+  linkService,
+  unlinkService,
+  getMyServices,
   getAssignedBookings,
   advanceBookingState,
 };
-

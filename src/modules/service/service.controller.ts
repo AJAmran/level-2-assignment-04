@@ -6,13 +6,12 @@ import httpStatus from "http-status";
 import { pick } from "../../utils/pick";
 
 const createService = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user!.id;
-  const result = await ServiceService.createService(userId, req.body);
+  const result = await ServiceService.createService(req.user!.id, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "Service offering registered successfully",
+    message: "Service created successfully",
     data: result,
   });
 });
@@ -26,16 +25,29 @@ const getAllServices = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Services Fetch Successfully",
+    message: "Services fetched successfully",
     meta: result.meta,
     data: result.data,
   });
 });
 
+const getServiceById = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string") throw new Error("Invalid service id");
+  const result = await ServiceService.getServiceById(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Service fetched successfully",
+    data: result,
+  });
+});
+
 const updateService = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user!.id;
-  const serviceId = req.params.id as string;
-  const result = await ServiceService.updateService(userId, serviceId, req.body);
+  const serviceId = req.params.id;
+  if (typeof serviceId !== "string") throw new Error("Invalid service id");
+  const result = await ServiceService.updateService(serviceId, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -46,9 +58,9 @@ const updateService = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteService = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user!.id;
-  const serviceId = req.params.id as string;
-  const result = await ServiceService.deleteService(userId, serviceId);
+  const serviceId = req.params.id;
+  if (typeof serviceId !== "string") throw new Error("Invalid service id");
+  const result = await ServiceService.deleteService(serviceId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -61,6 +73,7 @@ const deleteService = catchAsync(async (req: Request, res: Response) => {
 export const ServiceController = {
   createService,
   getAllServices,
+  getServiceById,
   updateService,
   deleteService,
 };

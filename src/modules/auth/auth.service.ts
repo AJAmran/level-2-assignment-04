@@ -32,7 +32,7 @@ const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
     Number(config.salt_rounds),
   );
 
-  const newUser = await prisma.$transaction(async (tx) => {
+    const newUser = await prisma.$transaction(async (tx) => {
     const userResult = await tx.user.create({
       data: {
         email: payload.email,
@@ -41,6 +41,7 @@ const registerUser = async (payload: User): Promise<Omit<User, "password">> => {
         name: payload.name,
         phone: payload.phone,
         address: payload.address,
+        image: payload.image,
       },
     });
 

@@ -8,24 +8,25 @@ import { GlobalValidations } from "../../utils/validations";
 const router = Router();
 
 router.get("/", ServiceController.getAllServices);
+router.get("/:id", ServiceController.getServiceById);
 
 router.post(
   "/",
-  authGuard(UserRole.TECHNICIAN),
+  authGuard(UserRole.TECHNICIAN, UserRole.ADMIN),
   validateRequest(GlobalValidations.createServiceSchema),
   ServiceController.createService,
 );
 
 router.patch(
   "/:id",
-  authGuard(UserRole.TECHNICIAN),
+  authGuard(UserRole.TECHNICIAN, UserRole.ADMIN),
   validateRequest(GlobalValidations.updateServiceSchema),
   ServiceController.updateService,
 );
 
 router.delete(
   "/:id",
-  authGuard(UserRole.TECHNICIAN),
+  authGuard(UserRole.TECHNICIAN, UserRole.ADMIN),
   ServiceController.deleteService,
 );
 

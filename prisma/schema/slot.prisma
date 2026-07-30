@@ -1,0 +1,15 @@
+model Slot {
+  id           String   @id @default(uuid())
+  technicianId String
+  technician   TechnicianProfile @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  startTime    DateTime
+  endTime      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  booking Booking?
+
+  @@index([technicianId, startTime])
+  @@index([startTime])
+  @@map("slots")
+}
