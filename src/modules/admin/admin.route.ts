@@ -12,5 +12,7 @@ router.patch("/users/:id", authGuard(UserRole.ADMIN), validateParams(GlobalValid
 router.get("/bookings", authGuard(UserRole.ADMIN), validateQuery(GlobalValidations.paginationSchema), AdminController.getAllBookings);
 router.get("/categories", authGuard(UserRole.ADMIN), AdminController.getAllCategories);
 router.post("/categories", authGuard(UserRole.ADMIN), validateRequest(GlobalValidations.createCategorySchema), AdminController.createCategory);
+router.patch("/categories/:id", authGuard(UserRole.ADMIN), validateParams(GlobalValidations.uuidParamSchema), validateRequest(GlobalValidations.createCategorySchema), AdminController.updateCategory);
+router.delete("/categories/:id", authGuard(UserRole.ADMIN), validateParams(GlobalValidations.uuidParamSchema), AdminController.deleteCategory);
 
 export const AdminRoutes = router;

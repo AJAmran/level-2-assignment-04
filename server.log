@@ -1,0 +1,142 @@
+
+> next-level-assignment-04@1.0.0 dev
+> tsx watch src/server.ts
+
+◇ injected env (9) from .env // tip: ⌘ suppress logs { quiet: true }
+Database Connected Successfully
+Server is running on port 5000
+(node:17800) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17800) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+11:02:57 PM [tsx] change in ./src\modules\auth\auth.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ enable debugging { debug: true }
+Database Connected Successfully
+Server is running on port 5000
+11:13:23 PM [tsx] change in ./src\utils\globalErrorHandler.ts Rerunning...
+c◇ injected env (9) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Database Connected Successfully
+Server is running on port 5000
+11:17:22 PM [tsx] change in ./src\utils\validations.ts Rerunning...
+c◇ injected env (9) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Database Connected Successfully
+Server is running on port 5000
+11:17:27 PM [tsx] change in ./src\utils\validations.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌘ override existing { override: true }
+Database Connected Successfully
+Server is running on port 5000
+11:17:35 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Database Connected Successfully
+Server is running on port 5000
+11:17:39 PM [tsx] change in ./src\modules\technician\technician.service.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Database Connected Successfully
+Server is running on port 5000
+11:17:45 PM [tsx] change in ./src\modules\technician\technician.controller.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ override existing { override: true }
+Database Connected Successfully
+Server is running on port 5000
+11:17:50 PM [tsx] change in ./src\modules\technician\technician.controller.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌘ suppress logs { quiet: true }
+Database Connected Successfully
+Server is running on port 5000
+11:17:55 PM [tsx] change in ./src\modules\technician\technician.route.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ enable debugging { debug: true }
+Database Connected Successfully
+Server is running on port 5000
+(node:10428) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:10428) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+11:19:50 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Database Connected Successfully
+Server is running on port 5000
+11:19:56 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Database Connected Successfully
+Server is running on port 5000
+11:20:01 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Database Connected Successfully
+Server is running on port 5000
+(node:2612) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+11:20:48 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Database Connected Successfully
+Server is running on port 5000
+11:20:54 PM [tsx] change in ./src\modules\technician\technician.service.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Database Connected Successfully
+Server is running on port 5000
+11:20:59 PM [tsx] change in ./src\modules\technician\technician.service.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Database Connected Successfully
+Server is running on port 5000
+(node:2988) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2988) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+11:25:39 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ suppress logs { quiet: true }
+Database Connected Successfully
+Server is running on port 5000
+11:25:44 PM [tsx] change in ./src\modules\technician\technician.service.ts Rerunning...
+c◇ injected env (9) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Database Connected Successfully
+Server is running on port 5000
+11:26:07 PM [tsx] change in ./src\modules\technician\technician.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ override existing { override: true }
+Database Connected Successfully
+Server is running on port 5000
+(node:15216) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15216) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+11:57:03 PM [tsx] change in ./src\modules\service\service.service.ts Restarting...
+c◇ injected env (9) from .env // tip: ⌘ enable debugging { debug: true }
+Database Connected Successfully
+Server is running on port 5000
+(node:13212) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13212) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.

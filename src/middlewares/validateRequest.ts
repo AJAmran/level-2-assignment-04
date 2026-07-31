@@ -15,7 +15,12 @@ export const validateRequest = (schema: ZodSchema) => {
 export const validateQuery = (schema: ZodSchema) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const parsed = await schema.parseAsync(req.query);
-    req.query = parsed as typeof req.query;
+    Object.defineProperty(req, "query", {
+      value: parsed as typeof req.query,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
     next();
   });
 };

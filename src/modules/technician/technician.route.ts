@@ -17,6 +17,7 @@ operationsRouter.put("/profile", authGuard(UserRole.TECHNICIAN), validateRequest
 operationsRouter.post("/slots", authGuard(UserRole.TECHNICIAN), validateRequest(GlobalValidations.createSlotsSchema), TechnicianController.createSlots);
 operationsRouter.get("/slots", authGuard(UserRole.TECHNICIAN), TechnicianController.getMySlots);
 operationsRouter.delete("/slots/:id", authGuard(UserRole.TECHNICIAN), validateParams(GlobalValidations.uuidParamSchema), TechnicianController.deleteSlot);
+operationsRouter.patch("/slots/:id", authGuard(UserRole.TECHNICIAN), validateParams(GlobalValidations.uuidParamSchema), validateRequest(GlobalValidations.updateSlotSchema), TechnicianController.updateSlot);
 
 // Service linking
 operationsRouter.post("/services", authGuard(UserRole.TECHNICIAN), validateRequest(GlobalValidations.linkServiceSchema), TechnicianController.linkService);

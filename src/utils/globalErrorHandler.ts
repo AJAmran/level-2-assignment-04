@@ -18,6 +18,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
         field: issue.path[issue.path.length - 1],
         message: issue.message,
       })),
+      message: err.issues[0]?.message || "Validation failed",
       name: "ZodError"
     };
   /** Custom application errors -> use their assigned status code */

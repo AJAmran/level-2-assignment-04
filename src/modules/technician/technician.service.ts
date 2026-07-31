@@ -13,6 +13,7 @@ type TechnicianProfileUpdatePayload = {
   bio?: string;
   location?: string;
   experience?: number;
+  image?: string;
 };
 
 type SlotCreatePayload = {
@@ -69,11 +70,20 @@ const updateProfile = async (userId: string, payload: TechnicianProfileUpdatePay
   if (payload.location !== undefined) safePayload.location = payload.location;
   if (payload.experience !== undefined) safePayload.experience = payload.experience;
 
-  return await prisma.technicianProfile.upsert({
+  const profile = await prisma.technicianProfile.upsert({
     where: { userId },
     update: safePayload,
     create: { userId, ...safePayload },
   });
+
+  if (payload.image !== undefined) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image: payload.image },
+    });
+  }
+
+  return profile;
 };
 
 // ── Slot Management ─────────────────────────────────────────────────────
@@ -90,10 +100,37 @@ const createSlots = async (userId: string, slots: SlotCreatePayload[]) => {
     endTime: new Date(slot.endTime),
   }));
 
+  const existingSlots = await prisma.slot.findMany({
+    where: { technicianId: profile.id },
+    select: { startTime: true, endTime: true },
+  });
+
+  const ranges = [
+    ...existingSlots.map((e) => ({ startTime: e.startTime, endTime: e.endTime })),
+    ...data.map((d) => ({ startTime: d.startTime, endTime: d.endTime })),
+  ].sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+
+  for (let i = 0; i < ranges.length - 1; i++) {
+    const current = ranges[i];
+    const next = ranges[i + 1];
+    if (current && next && current.endTime > next.startTime) {
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        "Slot time overlaps an existing slot. Choose a non-conflicting time.",
+      );
+    }
+  }
+
   await prisma.slot.createMany({ data });
   return await prisma.slot.findMany({
     where: { technicianId: profile.id },
-    include: { booking: { select: { id: true, customerId: true, status: true } } },
+    select: {
+      id: true,
+      technicianId: true,
+      startTime: true,
+      endTime: true,
+      booking: { select: { id: true, customerId: true, status: true } },
+    },
     orderBy: { startTime: "asc" },
   });
 };
@@ -105,7 +142,13 @@ const getMySlots = async (userId: string) => {
   }
   return await prisma.slot.findMany({
     where: { technicianId: profile.id },
-    include: { booking: { select: { id: true, customerId: true, status: true } } },
+    select: {
+      id: true,
+      technicianId: true,
+      startTime: true,
+      endTime: true,
+      booking: { select: { id: true, customerId: true, status: true } },
+    },
     orderBy: { startTime: "asc" },
   });
 };
@@ -127,6 +170,55 @@ const deleteSlot = async (userId: string, slotId: string) => {
   }
   await prisma.slot.delete({ where: { id: slotId } });
   return { message: "Slot deleted successfully." };
+};
+
+const updateSlot = async (userId: string, slotId: string, payload: SlotCreatePayload) => {
+  const profile = await prisma.technicianProfile.findUnique({ where: { userId } });
+  if (!profile) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Technician profile not found.");
+  }
+  const slot = await prisma.slot.findUnique({
+    where: { id: slotId },
+    include: { booking: true },
+  });
+  if (!slot || slot.technicianId !== profile.id) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Slot not found.");
+  }
+  if (slot.booking) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Cannot update a booked slot.");
+  }
+
+  const newStart = new Date(payload.startTime);
+  const newEnd = new Date(payload.endTime);
+
+  const existing = await prisma.slot.findMany({
+    where: { technicianId: profile.id, id: { not: slotId } },
+    select: { startTime: true, endTime: true },
+  });
+  const overlap = existing.some(
+    (e) => newStart < e.endTime && newEnd > e.startTime,
+  );
+  if (overlap) {
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "New slot time overlaps an existing slot. Choose a non-conflicting time.",
+    );
+  }
+
+  return await prisma.slot.update({
+    where: { id: slotId },
+    data: {
+      startTime: newStart,
+      endTime: newEnd,
+    },
+    select: {
+      id: true,
+      technicianId: true,
+      startTime: true,
+      endTime: true,
+      booking: { select: { id: true, customerId: true, status: true } },
+    },
+  });
 };
 
 const getTechnicianSlots = async (technicianId: string) => {
@@ -226,6 +318,7 @@ export const TechnicianService = {
   createSlots,
   getMySlots,
   deleteSlot,
+  updateSlot,
   getTechnicianSlots,
   linkService,
   unlinkService,

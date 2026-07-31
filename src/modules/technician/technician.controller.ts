@@ -79,6 +79,18 @@ const deleteSlot = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateSlot = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const slotId = req.params.id as string;
+  const result = await TechnicianService.updateSlot(userId, slotId, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Slot updated successfully",
+    data: result,
+  });
+});
+
 /** Public: get available slots for a technician. */
 const getTechnicianSlots = catchAsync(async (req: Request, res: Response) => {
   const technicianId = req.params.id as string;
@@ -163,6 +175,7 @@ export const TechnicianController = {
   createSlots,
   getMySlots,
   deleteSlot,
+  updateSlot,
   getTechnicianSlots,
   linkService,
   unlinkService,

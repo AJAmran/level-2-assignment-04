@@ -60,6 +60,7 @@ const updateTechnicianProfileSchema = z.object({
     .min(0, "Experience cannot be negative")
     .max(60, "Experience cannot exceed 60 years")
     .optional(),
+  image: z.string().url("Image must be a valid URL").optional().or(z.literal("")),
 });
 
 const slotEntrySchema = z
@@ -78,6 +79,11 @@ const slotEntrySchema = z
 
 const createSlotsSchema = z.object({
   slots: z.array(slotEntrySchema).min(1, "At least one slot is required").max(50, "Too many slots in one request"),
+});
+
+const updateSlotSchema = z.object({
+  startTime: z.string().datetime("Start time must be a valid ISO datetime"),
+  endTime: z.string().datetime("End time must be a valid ISO datetime"),
 });
 
 const updateBookingStatusSchema = z.object({
@@ -125,6 +131,7 @@ export const GlobalValidations = {
   createReviewSchema,
   updateTechnicianProfileSchema,
   createSlotsSchema,
+  updateSlotSchema,
   updateBookingStatusSchema,
   updateUserStatusSchema,
   createPaymentSchema,

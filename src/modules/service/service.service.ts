@@ -16,13 +16,27 @@ const createService = async (
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found.");
   }
 
-  return await prisma.service.create({
-    data: {
-      name: payload.name,
-      price: payload.price,
-      categoryId: payload.categoryId,
-      image: payload.image,
-    },
+  return await prisma.$transaction(async (tx) => {
+    const service = await tx.service.create({
+      data: {
+        name: payload.name,
+        price: payload.price,
+        categoryId: payload.categoryId,
+        image: payload.image,
+      },
+    });
+
+    const profile = await tx.technicianProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (profile) {
+      await tx.technicianService.create({
+        data: { technicianId: profile.id, serviceId: service.id },
+      });
+    }
+
+    return service;
   });
 };
 

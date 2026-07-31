@@ -168,7 +168,16 @@ const getMe = async (id: string, role: string): Promise<TUserResponse> => {
       isDeleted: false,
     },
     include: {
-      technicianProfile: role === "TECHNICIAN",
+      technicianProfile:
+        role === "TECHNICIAN"
+          ? {
+              include: {
+                user: {
+                  select: { id: true, name: true, email: true, image: true },
+                },
+              },
+            }
+          : false,
     },
   });
 

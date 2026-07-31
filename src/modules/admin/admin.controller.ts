@@ -65,10 +65,36 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+/** Update an existing category by ID. */
+const updateCategory = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await AdminService.updateCategory(id, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category updated successfully",
+    data: result,
+  });
+});
+
+/** Delete a category by ID. */
+const deleteCategory = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await AdminService.deleteCategory(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category deleted successfully",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUserStatus,
   getAllBookings,
   getAllCategories,
   createCategory,
+  updateCategory,
+  deleteCategory,
 };

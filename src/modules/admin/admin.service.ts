@@ -1,4 +1,6 @@
 import { prisma } from "../../lib/prisma";
+import { ApiError } from "../../utils/ApiError";
+import httpStatus from "http-status";
 
 type CategoryCreatePayload = {
   name: string;
@@ -81,11 +83,46 @@ const createCategory = async (payload: CategoryCreatePayload) => {
   });
 };
 
+/** Update an existing category. Throws 404 if the category does not exist. */
+const updateCategory = async (id: string, payload: CategoryCreatePayload) => {
+  const category = await prisma.category.findUnique({ where: { id } });
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found.");
+  }
+  return await prisma.category.update({
+    where: { id },
+    data: {
+      name: payload.name,
+      slug: payload.slug,
+    },
+  });
+};
+
+/** Delete a category. Refuses to delete categories that still have services. */
+const deleteCategory = async (id: string) => {
+  const category = await prisma.category.findUnique({ where: { id } });
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found.");
+  }
+  const serviceCount = await prisma.service.count({
+    where: { categoryId: id, isDeleted: false },
+  });
+  if (serviceCount > 0) {
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      `Cannot delete category: ${serviceCount} service${serviceCount === 1 ? "" : "s"} still reference it.`,
+    );
+  }
+  return await prisma.category.delete({ where: { id } });
+};
+
 export const AdminService = {
   getAllUsers,
   updateUserStatus,
   getAllBookings,
   getAllCategories,
   createCategory,
+  updateCategory,
+  deleteCategory,
 };
 
