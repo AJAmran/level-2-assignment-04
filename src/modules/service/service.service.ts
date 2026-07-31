@@ -37,10 +37,14 @@ const getAllServices = async (filters: TServiceFilterableFields, options: any) =
   if (categoryId) {
     whereConditions.categoryId = categoryId;
   }
-  if (minPrice || maxPrice) {
+  if (minPrice !== undefined || maxPrice !== undefined) {
     whereConditions.price = {};
-    if (minPrice) whereConditions.price.gte = parseFloat(minPrice);
-    if (maxPrice) whereConditions.price.lte = parseFloat(maxPrice);
+    if (minPrice !== undefined && minPrice !== "") {
+      whereConditions.price.gte = parseFloat(minPrice);
+    }
+    if (maxPrice !== undefined && maxPrice !== "") {
+      whereConditions.price.lte = parseFloat(maxPrice);
+    }
   }
 
   const result = await prisma.service.findMany({

@@ -28,20 +28,35 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
       path: "",
       message: err.message,
     };
-  /** Prisma unique constraint violation -> 409 Conflict */
+  /** Prisma known request errors -> mapped to appropriate HTTP statuses */
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") {
-      statusCode = httpStatus.CONFLICT;
-      message = "Duplicate Resource Error";
-      errorDetails = {
-        message: `Unique constraint failed on the fields: ${(err.meta?.target as string[])?.join(", ") || "unknown"}`,
-      };
-    } else {
-      statusCode = httpStatus.BAD_REQUEST;
-      message = "Database Error";
-      errorDetails = {
-        message: err.message,
-      };
+    switch (err.code) {
+      case "P2002": // Unique constraint violation
+        statusCode = httpStatus.CONFLICT;
+        message = "Duplicate Resource Error";
+        errorDetails = {
+          message: `Unique constraint failed on the fields: ${(err.meta?.target as string[])?.join(", ") || "unknown"}`,
+        };
+        break;
+      case "P2003": // Foreign key constraint violation
+        statusCode = httpStatus.BAD_REQUEST;
+        message = "Referenced resource does not exist";
+        errorDetails = { message: err.message };
+        break;
+      case "P2011": // Null constraint violation
+        statusCode = httpStatus.BAD_REQUEST;
+        message = "A required field is missing";
+        errorDetails = { message: err.message };
+        break;
+      case "P2025": // Record not found
+        statusCode = httpStatus.NOT_FOUND;
+        message = "Resource not found";
+        errorDetails = { message: err.message };
+        break;
+      default:
+        statusCode = httpStatus.INTERNAL_SERVER_ERROR;
+        message = "Database Error";
+        errorDetails = { message: err.message };
     }
   } else if (err instanceof Error) {
     message = err.message;
