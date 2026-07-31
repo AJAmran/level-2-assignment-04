@@ -51,6 +51,13 @@ const createReview = async (
       );
     }
 
+    if (!booking.technicianId) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Cannot review a booking with no technician assigned.",
+      );
+    }
+
     const reviewResult = await tx.review.create({
       data: {
         bookingId: payload.bookingId,

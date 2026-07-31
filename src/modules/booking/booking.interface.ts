@@ -2,8 +2,8 @@ import { BookingStatus } from "../../../generated/prisma/client";
 
 export type TCreateBookingPayload = {
   serviceId: string;
-  technicianId: string;
-  slotId: string;
+  technicianId?: string;
+  slotId?: string;
   address: string;
   phone: string;
 };

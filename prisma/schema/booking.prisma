@@ -2,14 +2,14 @@ model Booking {
   id            String            @id @default(uuid())
   customerId    String
   customer      User              @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
-  technicianId  String
-  technician    TechnicianProfile @relation("TechnicianBookings", fields: [technicianId], references: [id], onDelete: Restrict)
+  technicianId  String?
+  technician    TechnicianProfile? @relation("TechnicianBookings", fields: [technicianId], references: [id], onDelete: Restrict)
   serviceId     String
   service       Service           @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   slotId        String?           @unique
   slot          Slot?             @relation(fields: [slotId], references: [id], onDelete: SetNull)
   status        BookingStatus     @default(REQUESTED)
-  scheduledTime DateTime
+  scheduledTime DateTime?
   address       String?
   phone         String?
   isDeleted     Boolean           @default(false)

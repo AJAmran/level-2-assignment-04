@@ -9,6 +9,38 @@ import httpStatus from "http-status";
 import { getTechnicianProfileOrThrow } from "../../utils/getTechnicianProfile";
 import { TCreateBookingPayload } from "./booking.interface";
 
+/**
+ * Round-robin technician assignment: picks the technician offering the service
+ * who currently has the fewest active (non-terminal) bookings.
+ */
+const autoAssignTechnician = async (serviceId: string): Promise<string | null> => {
+  const candidates = await prisma.technicianService.findMany({
+    where: { serviceId },
+    select: { technicianId: true },
+  });
+  if (candidates.length === 0) return null;
+
+  const activeStatuses: BookingStatus[] = [
+    "REQUESTED", "ACCEPTED", "PAID", "IN_PROGRESS",
+  ];
+
+  const loads = await prisma.booking.groupBy({
+    by: ["technicianId"],
+    where: {
+      technicianId: { in: candidates.map((c) => c.technicianId) },
+      status: { in: activeStatuses },
+      isDeleted: false,
+    },
+    _count: { _all: true },
+  });
+
+  const loadMap = new Map(loads.map((l) => [l.technicianId, l._count._all]));
+  const chosen = [...candidates].sort(
+    (a, b) => (loadMap.get(a.technicianId) ?? 0) - (loadMap.get(b.technicianId) ?? 0),
+  )[0];
+  return chosen?.technicianId ?? null;
+};
+
 const createBooking = async (
   customerId: string,
   payload: TCreateBookingPayload,
@@ -22,41 +54,57 @@ const createBooking = async (
     throw new ApiError(httpStatus.NOT_FOUND, "Service not found.");
   }
 
-  const techService = await prisma.technicianService.findUnique({
-    where: { technicianId_serviceId: { technicianId, serviceId } },
-  });
-  if (!techService) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "This technician does not offer the selected service.",
-    );
+  const assignedTechnicianId =
+    technicianId ?? (await autoAssignTechnician(serviceId));
+
+  if (technicianId) {
+    const techService = await prisma.technicianService.findUnique({
+      where: { technicianId_serviceId: { technicianId, serviceId } },
+    });
+    if (!techService) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "This technician does not offer the selected service.",
+      );
+    }
   }
 
-  const slot = await prisma.slot.findUnique({
-    where: { id: slotId },
-    include: { booking: true },
-  });
-  if (!slot || slot.technicianId !== technicianId) {
+  const slot = slotId
+    ? await prisma.slot.findUnique({ where: { id: slotId } })
+    : null;
+  if (slotId && (!slot || (technicianId && slot.technicianId !== technicianId))) {
     throw new ApiError(httpStatus.NOT_FOUND, "Slot not found.");
-  }
-  if (slot.booking) {
-    throw new ApiError(httpStatus.CONFLICT, "This slot is already booked.");
   }
 
   const booking = await prisma.$transaction(async (tx) => {
-    const b = await tx.booking.create({
-      data: {
-        customerId,
-        technicianId,
-        serviceId,
-        slotId,
-        scheduledTime: slot.startTime,
-        address,
-        phone,
-        status: "REQUESTED",
-      },
-    });
-    return b;
+    try {
+      const b = await tx.booking.create({
+        data: {
+          customerId,
+          ...(assignedTechnicianId && { technicianId: assignedTechnicianId }),
+          serviceId,
+          ...(slotId && { slotId }),
+          ...(slot?.startTime && { scheduledTime: slot.startTime }),
+          address,
+          phone,
+          status: "REQUESTED",
+        },
+      });
+      return b;
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: string }).code === "P2002"
+      ) {
+        throw new ApiError(
+          httpStatus.CONFLICT,
+          "This slot is already booked.",
+        );
+      }
+      throw error;
+    }
   });
 
   return booking;
@@ -77,8 +125,6 @@ const getUserBookings = async (
       "Technician reference tracking map context missing",
     );
     queryConditions.technicianId = profile.id;
-  } else if (role === UserRole.ADMIN) {
-    return [];
   }
 
   return await prisma.booking.findMany({
