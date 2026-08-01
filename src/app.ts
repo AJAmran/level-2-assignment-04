@@ -11,6 +11,7 @@ const app: Application = express();
 const allowedOrigins = [
   config.frontend_url,
   config.app_url,
+  config.SSL_COMMERCE_URL,
   // Allow all Vercel preview/production deployments
   ...(process.env.ADDITIONAL_ORIGINS ? process.env.ADDITIONAL_ORIGINS.split(",") : []),
 ].filter(Boolean);

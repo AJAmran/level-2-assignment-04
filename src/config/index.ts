@@ -15,4 +15,5 @@ export default {
   salt_rounds: process.env.SALT_ROUNDS,
   storeId: process.env.Store_ID!,
   storePasswd: process.env.Store_Password!,
+  SSL_COMMERCE_URL: process.env.SSL_COMMERCE_URL!,
 };
