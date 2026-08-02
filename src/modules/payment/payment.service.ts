@@ -74,9 +74,9 @@ const initiatePayment = async (
     total_amount: booking.service.price.toString(),
     currency: "BDT",
     tran_id: transactionId,
-    success_url: `${config.frontend_url}/payment/success?bookingId=${booking.id}&tranId=${transactionId}&status=success`,
-    fail_url: `${config.frontend_url}/payment/cancel?bookingId=${booking.id}&tranId=${transactionId}&status=fail`,
-    cancel_url: `${config.frontend_url}/payment/cancel?bookingId=${booking.id}&tranId=${transactionId}&status=cancel`,
+    success_url: `${config.frontend_url}/api/payment/success?bookingId=${booking.id}&tranId=${transactionId}&status=success`,
+    fail_url: `${config.frontend_url}/api/payment/cancel?bookingId=${booking.id}&tranId=${transactionId}&status=fail`,
+    cancel_url: `${config.frontend_url}/api/payment/cancel?bookingId=${booking.id}&tranId=${transactionId}&status=cancel`,
     cus_name: (booking.customer.name ??
       booking.customer.email.split("@")[0]) as string,
     cus_email: booking.customer.email as string,
